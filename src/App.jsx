@@ -92,6 +92,10 @@ function App() {
         </div>
       </main>
 
+      <footer className="footer">
+        <p className="footer-text">Dashboard App by Kurokodairu</p>
+      </footer>
+
       <SettingsPanel 
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Cloud, Sun, CloudRain, CloudSnow, Wind, Droplets } from 'lucide-react'
+import { Cloud, Wind} from 'lucide-react'
 
 const WeatherCard = ({ cityCoords }) => {
   const [weather, setWeather] = useState(null)
@@ -40,13 +40,17 @@ const WeatherCard = ({ cityCoords }) => {
         
         const current = data.properties.timeseries[0].data.instant.details
         const next1h = data.properties.timeseries[0].data.next_1_hours?.summary?.symbol_code
+        const next6h = data.properties.timeseries[0].data.next_6_hours?.summary?.symbol_code
         
         setWeather({
           temperature: Math.round(current.air_temperature),
-          humidity: Math.round(current.relative_humidity),
           windSpeed: Math.round(current.wind_speed * 3.6), // Convert m/s to km/h
-          condition: next1h || 'clearsky_day'
+          condition: next1h || 'clearsky_day',
+          next6hCode: next6h || 'clearsky_day',
+          next6hRain: data.properties.timeseries[0].data.next_6_hours?.details?.precipitation_amount || 0,
         })
+
+
       } catch (err) {
         setError(err.message)
         setWeather(null)
@@ -58,12 +62,18 @@ const WeatherCard = ({ cityCoords }) => {
     fetchWeather()
   }, [cityCoords])
 
+
   const getWeatherIcon = (condition) => {
-    if (condition.includes('rain')) return <CloudRain size={48} />
-    if (condition.includes('snow')) return <CloudSnow size={48} />
-    if (condition.includes('cloud')) return <Cloud size={48} />
-    return <Sun size={48} />
-  }
+  const iconUrl = `/icons/${condition}.svg`
+  console.log("Weather icon URL:", iconUrl)
+  return (
+    <img
+      src={iconUrl}
+      alt={condition}
+      style={{ width: '48px', height: '48px' }}
+    />
+  )
+}
 
   const getWeatherDescription = (condition) => {
     if (condition.includes('rain')) return 'Rainy'
@@ -77,7 +87,7 @@ const WeatherCard = ({ cityCoords }) => {
     return (
       <div className="glass-card">
         <h2 className="card-title">
-          <Cloud size={24} />
+          {getWeatherIcon("clearsky_day")}
           Weather
         </h2>
         <div className="no-location">
@@ -106,7 +116,7 @@ const WeatherCard = ({ cityCoords }) => {
     return (
       <div className="glass-card">
         <h2 className="card-title">
-          <Cloud size={24} />
+          {getWeatherIcon("clearsky_day")}
           Weather
         </h2>
         <div className="error">
@@ -137,16 +147,21 @@ const WeatherCard = ({ cityCoords }) => {
         
         <div className="weather-details">
           <div className="weather-detail">
-            <Droplets size={20} />
-            <span>{weather.humidity}%</span>
-            <small>Humidity</small>
+            {/* Next 6 hours icon and description */}
+            {weather.next6hCode ? getWeatherIcon(weather.next6hCode) : getWeatherIcon('clearsky_day')}
+            <span>
+              {weather.next6hCode ? getWeatherDescription(weather.next6hCode) : 'Clear'}
+            </span>
+            <small>{weather.next6hRain} mm</small>
           </div>
+
           <div className="weather-detail">
-            <Wind size={20} />
+            <Wind size={48} />
             <span>{weather.windSpeed} km/h</span>
             <small>Wind</small>
           </div>
         </div>
+
       </div>
 
       <style>{`

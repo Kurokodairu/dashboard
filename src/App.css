@@ -49,13 +49,22 @@ body {
   padding: 0 0 0 0;
 }
 
+.footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.2);
+}
+
 .time-section {
   flex: 1;
 }
 
 .time {
   font-size: 4rem;
-  font-weight: 200;
+  font-weight: 300;
   letter-spacing: -0.02em;
   margin-bottom: 0.5rem;
   background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
