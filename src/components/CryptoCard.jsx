@@ -9,9 +9,12 @@ const CryptoCard = () => {
   useEffect(() => {
     const fetchCryptoData = async () => {
       try {
-        const response = await fetch(
-          '/coingecko/api/v3/simple/price?ids=bitcoin,ethereum,cardano,polkadot,chainlink&vs_currencies=usd&include_24hr_change=true'
-        )
+        // Use direct API URL in production, proxy in development
+        const apiUrl = import.meta.env.PROD 
+          ? 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,cardano,polkadot,chainlink&vs_currencies=usd&include_24hr_change=true'
+          : '/coingecko/api/v3/simple/price?ids=bitcoin,ethereum,cardano,polkadot,chainlink&vs_currencies=usd&include_24hr_change=true'
+
+        const response = await fetch(apiUrl)
 
         if (!response.ok) {
           throw new Error('Crypto data unavailable')

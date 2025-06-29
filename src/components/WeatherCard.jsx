@@ -20,10 +20,16 @@ const WeatherCard = ({ cityCoords }) => {
       try {
         const { latitude, longitude } = cityCoords
 
-        // Fetch weather data from yr.no via Vite proxy
-        const response = await fetch(
-          `/weather?lat=${latitude}&lon=${longitude}`
-        )
+        // Use direct API URL in production, proxy in development
+        const apiUrl = import.meta.env.PROD 
+          ? `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${latitude}&lon=${longitude}`
+          : `/weather?lat=${latitude}&lon=${longitude}`
+
+        const headers = import.meta.env.PROD 
+          ? { 'User-Agent': 'Dashboard App (kurokodairuwu@proton.me)' }
+          : {}
+
+        const response = await fetch(apiUrl, { headers })
 
         if (!response.ok) {
           throw new Error('Weather data unavailable')
