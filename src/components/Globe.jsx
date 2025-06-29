@@ -15,24 +15,43 @@ const Globe = () => {
       phi: 0,
       theta: 0,
       dark: 1,
-      diffuse: 1.2,
+      diffuse: 1, 
       mapSamples: 16000,
-      mapBrightness: 6,
+      mapBrightness: 10,
       baseColor: [0.3, 0.3, 0.3],
       markerColor: [0.1, 0.8, 1],
-      glowColor: [1, 1, 1],
+      glowColor: [0.2, 0.2, 0.2],
       markers: [
-        // Add some interesting locations
-        { location: [37.7595, -122.4367], size: 0.03 }, // San Francisco
-        { location: [40.7128, -74.006], size: 0.03 }, // New York
-        { location: [51.5074, -0.1278], size: 0.03 }, // London
-        { location: [35.6762, 139.6503], size: 0.03 }, // Tokyo
-        { location: [-33.8688, 151.2093], size: 0.03 }, // Sydney
+      // Add some interesting locations
+      { location: [59.9139, 10.7522], size: 0.05 }, // Oslo, Norway
       ],
       onRender: (state) => {
-        // Auto-rotate
-        phi += 0.01
-        state.phi = phi
+      // Auto-rotate
+      
+        // 2) Tweak these to taste:
+        const minSpeed = 0.3;   // slowest
+        const maxSpeed = 3;   // fastest
+        const baseTilt = 0.3; // average tilt
+        const tiltAmp  = 0.4; // wobble amplitude
+
+        // A) Normalize phi into [0, 2π)
+        phi = (phi % (2*Math.PI) + 2*Math.PI) % (2*Math.PI);
+
+        // B) Signed difference from Oslo in [–π, +π)
+        let diff = osloLon - phi;
+        diff = ((diff + Math.PI) % (2*Math.PI)) - Math.PI;
+
+        // C) Easing so speed is min at Oslo (diff=0) and max at antipode (diff=π)
+        const ease  = (1 - Math.cos(diff)) * 0.5;
+        const speed = minSpeed + (maxSpeed - minSpeed) * ease;
+
+        // D) Advance longitude
+        phi += speed * 0.01;
+        state.phi = phi;
+
+        // E) Tilt wobble: nod north over Oslo, south on exact opposite
+        state.theta = baseTilt + tiltAmp * Math.sin(diff);
+
       }
     })
 
