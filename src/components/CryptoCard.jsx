@@ -11,8 +11,8 @@ const CryptoCard = () => {
       try {
         // Use Vercel function in production, proxy in development
         const apiUrl = import.meta.env.PROD 
-          ? '/api/crypto?ids=bitcoin,ethereum,cardano,polkadot,chainlink&vs_currencies=usd&include_24hr_change=true'
-          : '/coingecko/api/v3/simple/price?ids=bitcoin,ethereum,cardano,polkadot,chainlink&vs_currencies=usd&include_24hr_change=true'
+          ? '/api/crypto?ids=bitcoin,ethereum,monero,ripple&vs_currencies=usd&include_24hr_change=true'
+          : '/coingecko/api/v3/simple/price?ids=bitcoin,ethereum,monero,ripple&vs_currencies=usd&include_24hr_change=true'
 
         const response = await fetch(apiUrl)
 
@@ -38,25 +38,18 @@ const CryptoCard = () => {
             change: data.ethereum.usd_24h_change
           },
           {
-            id: 'cardano',
-            name: 'Cardano',
-            symbol: 'ADA',
-            price: data.cardano.usd,
-            change: data.cardano.usd_24h_change
+            id: 'monero',
+            name: 'Monero',
+            symbol: 'XMR',
+            price: data.monero.usd,
+            change: data.monero.usd_24h_change
           },
           {
-            id: 'polkadot',
-            name: 'Polkadot',
-            symbol: 'DOT',
-            price: data.polkadot.usd,
-            change: data.polkadot.usd_24h_change
-          },
-          {
-            id: 'chainlink',
-            name: 'Chainlink',
-            symbol: 'LINK',
-            price: data.chainlink.usd,
-            change: data.chainlink.usd_24h_change
+            id: 'xrp',
+            name: 'Ripple',
+            symbol: 'XRP',
+            price: data.ripple.usd,
+            change: data.ripple.usd_24h_change
           }
         ]
 

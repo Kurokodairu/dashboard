@@ -18,7 +18,7 @@ export default async function handler(req, res) {
 
   try {
     const { 
-      ids = 'bitcoin,ethereum,cardano,polkadot,chainlink',
+      ids = 'bitcoin,ethereum,monero,ripple',
       vs_currencies = 'usd',
       include_24hr_change = 'true'
     } = req.query;

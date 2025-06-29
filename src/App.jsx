@@ -99,11 +99,20 @@ function App() {
         currentCity={cityCoords}
       />
 
-      {!cityCoords && (
-        <div className="setup-hint">
-          <p>Press <kbd>Escape</kbd> to set your city</p>
-        </div>
-      )}
+  {!cityCoords && (
+    <div
+      className="setup-hint"
+      tabIndex={0}
+      role="button"
+      onClick={() => setShowSettings(true)}
+      onKeyDown={e => {
+        if (e.key === 'Enter' || e.key === ' ') setShowSettings(true)
+      }}
+      style={{ cursor: 'pointer' }}
+    >
+      <p>Press <kbd>Escape</kbd> or tap here to set your city</p>
+    </div>
+  )}
     </div>
   )
 }
