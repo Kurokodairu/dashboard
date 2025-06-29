@@ -25,9 +25,7 @@ const WeatherCard = ({ cityCoords }) => {
           ? `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${latitude}&lon=${longitude}`
           : `/weather?lat=${latitude}&lon=${longitude}`
 
-        const headers = import.meta.env.PROD 
-          ? { 'User-Agent': 'Dashboard App (kurokodairuwu@proton.me)' }
-          : {}
+        const headers = { 'User-Agent': 'Dashboard App (kurokodairuwu@proton.me)' }
 
         const response = await fetch(apiUrl, { headers })
 
