@@ -28,6 +28,8 @@ const Globe = () => {
       onRender: (state) => {
       // Auto-rotate
       
+        const osloLon = -75 * Math.PI/180;
+
         // 2) Tweak these to taste:
         const minSpeed = 0.3;   // slowest
         const maxSpeed = 3;   // fastest
