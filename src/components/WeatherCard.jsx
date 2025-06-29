@@ -20,14 +20,12 @@ const WeatherCard = ({ cityCoords }) => {
       try {
         const { latitude, longitude } = cityCoords
 
-        // Use direct API URL in production, proxy in development
+        // Use Vercel function in production, proxy in development
         const apiUrl = import.meta.env.PROD 
-          ? `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${latitude}&lon=${longitude}`
+          ? `/api/weather?lat=${latitude}&lon=${longitude}`
           : `/weather?lat=${latitude}&lon=${longitude}`
 
-        const headers = { 'User-Agent': 'Dashboard App (kurokodairuwu@proton.me)' }
-
-        const response = await fetch(apiUrl, { headers })
+        const response = await fetch(apiUrl)
 
         if (!response.ok) {
           throw new Error('Weather data unavailable')

@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "api/weather.js": {
+      "maxDuration": 10
+    },
+    "api/crypto.js": {
+      "maxDuration": 10
+    }
+  }
+}

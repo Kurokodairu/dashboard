@@ -9,9 +9,9 @@ const CryptoCard = () => {
   useEffect(() => {
     const fetchCryptoData = async () => {
       try {
-        // Use direct API URL in production, proxy in development
+        // Use Vercel function in production, proxy in development
         const apiUrl = import.meta.env.PROD 
-          ? 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,cardano,polkadot,chainlink&vs_currencies=usd&include_24hr_change=true'
+          ? '/api/crypto?ids=bitcoin,ethereum,cardano,polkadot,chainlink&vs_currencies=usd&include_24hr_change=true'
           : '/coingecko/api/v3/simple/price?ids=bitcoin,ethereum,cardano,polkadot,chainlink&vs_currencies=usd&include_24hr_change=true'
 
         const response = await fetch(apiUrl)
