@@ -121,9 +121,19 @@ const TwitchCard = () => {
       return
     }
 
-    const redirectUri = encodeURIComponent(window.location.origin)
-    const scopes = encodeURIComponent('user:read:follows')
-    const authUrl = `https://id.twitch.tv/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=token&scope=${scopes}`
+    // Use the exact current URL without any modifications
+    const redirectUri = window.location.origin + window.location.pathname
+    const scopes = 'user:read:follows'
+    
+    // Build the auth URL with proper encoding
+    const authUrl = `https://id.twitch.tv/oauth2/authorize?` +
+      `client_id=${clientId}&` +
+      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+      `response_type=token&` +
+      `scope=${encodeURIComponent(scopes)}`
+    
+    console.log('Redirect URI being used:', redirectUri)
+    console.log('Full auth URL:', authUrl)
     
     window.location.href = authUrl
   }
@@ -160,6 +170,12 @@ const TwitchCard = () => {
           <div className="setup-instructions">
             <p className="text-sm">
               Make sure to add your <code>VITE_TWITCH_CLIENT_ID</code> to your environment variables
+            </p>
+            <p className="text-sm mt-2">
+              <strong>Current redirect URI:</strong> {window.location.origin + window.location.pathname}
+            </p>
+            <p className="text-sm">
+              Add this exact URL to your Twitch app's OAuth Redirect URLs
             </p>
           </div>
         </div>
