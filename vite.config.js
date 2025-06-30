@@ -31,6 +31,18 @@ export default defineConfig({
             proxyReq.setHeader('User-Agent', 'Dashboard App (kurokodairuwu@proton.me)');
           });
         }
+      },
+      '/twitch': {
+        target: 'https://api.twitch.tv',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/twitch/, ''),
+        secure: true,
+        timeout: 10000,
+        configure: (proxy, options) => {
+          proxy.on('error', (err, req, res) => {
+            console.log('Twitch proxy error:', err);
+          });
+        }
       }
     }
   },

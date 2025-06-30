@@ -5,6 +5,12 @@
     },
     "api/crypto.js": {
       "maxDuration": 10
+    },
+    "api/twitch.js": {
+      "maxDuration": 10
+    },
+    "api/twitch-users.js": {
+      "maxDuration": 10
     }
   }
 }

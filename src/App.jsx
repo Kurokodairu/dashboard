@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import WeatherCard from './components/WeatherCard.jsx'
 import CryptoCard from './components/CryptoCard.jsx'
+import TwitchCard from './components/TwitchCard.jsx'
 import Globe from './components/Globe.jsx'
 import SettingsPanel from './components/SettingsPanel.jsx'
 import './App.css'
@@ -81,8 +82,13 @@ function App() {
       </header>
 
       <main className="dashboard-grid">
-        <div className="weather-card">
-          <WeatherCard cityCoords={cityCoords} />
+        <div className="left-column">
+          <div className="weather-card">
+            <WeatherCard cityCoords={cityCoords} />
+          </div>
+          <div className="twitch-card">
+            <TwitchCard />
+          </div>
         </div>
         <div className="empty-column">
           {/* Reserved for future content */}
