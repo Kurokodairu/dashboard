@@ -101,7 +101,7 @@ body {
   gap: 2rem;
   width: 100%;
   margin: 0 auto;
-  max-width: 1400px;
+  
 }
 
 .weather-card {
@@ -218,9 +218,9 @@ body {
   50% { opacity: 0.6; }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1156px) {
   .app {
-    padding: 20rem 1rem 1rem 1rem;
+    margin-top: 0;
   }
   
   .header {
@@ -228,10 +228,10 @@ body {
     align-items: center;
     text-align: center;
     gap: 1rem;
-    margin-bottom: 3rem;
     min-height: auto;
     padding: 0;
     overflow: visible;
+    min-height: 0 !important;
   }
 
   .globe-container {
@@ -240,6 +240,12 @@ body {
     height: 300px;
     margin: 0 auto;
     overflow: visible;
+  }
+
+  .glass-card {
+    min-width: 0;
+    width: 100%;
+    max-width: none;
   }
   
   .time {
@@ -275,10 +281,5 @@ body {
 }
 
 @media (max-width: 480px) {
-  .app {
-    margin-top: 40rem;
-  }
-  .header {
-    padding: 2rem 1rem 1rem 1rem;
-  }
+
 }
