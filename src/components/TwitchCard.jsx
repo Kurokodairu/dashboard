@@ -37,7 +37,7 @@ const TwitchCard = () => {
       // Use Vercel function in production, direct API in development
       const apiUrl = import.meta.env.PROD 
         ? '/api/twitch'
-        : '/twitch/helix/streams/followed'
+        : '/twitch/helix/streams/followed?user_id=237308507'
 
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -241,7 +241,14 @@ const TwitchCard = () => {
       
       <div className="streams-list">
         {liveChannels.slice(0, 5).map((stream) => (
-          <div key={stream.id} className="stream-item">
+          <div
+            key={stream.id}
+            className="stream-item"
+            onClick={() => {
+              window.open(`https://twitch.tv/${stream.user_login || stream.user_name}`, '_blank', 'noopener,noreferrer')
+            }}
+            style={{ cursor: 'pointer' }}
+          >
             <div className="stream-thumbnail">
               <img 
                 src={stream.thumbnail_url.replace('{width}', '80').replace('{height}', '45')}
@@ -250,7 +257,6 @@ const TwitchCard = () => {
                   e.target.style.display = 'none'
                 }}
               />
-              <div className="live-indicator">LIVE</div>
             </div>
             
             <div className="stream-info">
@@ -270,8 +276,8 @@ const TwitchCard = () => {
                   {formatViewerCount(stream.viewer_count)}
                 </div>
               </div>
-              
-              <div className="stream-title">{stream.title}</div>
+
+              <div className="stream-title">{stream.title.substring(0, 48)}...</div>
               <div className="stream-game">{stream.game_name}</div>
             </div>
           </div>
@@ -355,18 +361,6 @@ const TwitchCard = () => {
           width: 100%;
           height: 100%;
           object-fit: cover;
-        }
-
-        .live-indicator {
-          position: absolute;
-          top: 4px;
-          left: 4px;
-          background: #ff0000;
-          color: white;
-          font-size: 0.6rem;
-          font-weight: bold;
-          padding: 0.1rem 0.3rem;
-          border-radius: 3px;
         }
 
         .stream-info {

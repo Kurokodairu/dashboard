@@ -65,7 +65,6 @@ const WeatherCard = ({ cityCoords }) => {
 
   const getWeatherIcon = (condition) => {
   const iconUrl = `/icons/${condition}.svg`
-  console.log("Weather icon URL:", iconUrl)
   return (
     <img
       src={iconUrl}

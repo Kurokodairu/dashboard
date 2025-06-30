@@ -9,8 +9,8 @@ html {
 }
 
 html, body {
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  max-width: 100vw;
   margin: 0;
   padding: 0;
 }
@@ -101,23 +101,11 @@ body {
   gap: 2rem;
   width: 100%;
   margin: 0 auto;
-  max-width: 1400px;
-}
-
-.left-column {
-  grid-column: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  justify-self: start;
 }
 
 .weather-card {
-  width: 100%;
-}
-
-.twitch-card {
-  width: 100%;
+  grid-column: 1;
+  justify-self: start;
 }
 
 .empty-column {
@@ -129,6 +117,16 @@ body {
   grid-column: 3;
   justify-self: end;
 }
+
+.twitch-card {
+  grid-column: 1;
+  justify-self: start;
+}
+
+.weather-card { grid-column: 1; grid-row: 1; }
+.crypto-card { grid-column: 3; grid-row: 1; }
+.twitch-card { grid-column: 1; grid-row: 2; }
+
 
 .glass-card {
   background: rgba(255, 255, 255, 0.1);
@@ -143,6 +141,7 @@ body {
   position: relative;
   overflow: hidden;
   min-width: 350px;
+  max-width: 30vw;
 }
 
 .glass-card::before {
@@ -229,9 +228,9 @@ body {
   50% { opacity: 0.6; }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1156px) {
   .app {
-    padding: 20rem 1rem 1rem 1rem;
+    margin-top: 0;
   }
   
   .header {
@@ -239,10 +238,10 @@ body {
     align-items: center;
     text-align: center;
     gap: 1rem;
-    margin-bottom: 3rem;
     min-height: auto;
     padding: 0;
     overflow: visible;
+    min-height: 0 !important;
   }
 
   .globe-container {
@@ -252,33 +251,37 @@ body {
     margin: 0 auto;
     overflow: visible;
   }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin: 0;
+  }
   
   .time {
     font-size: 3rem;
   }
   
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
 
-  .left-column {
-    grid-column: 1;
+  .weather-card,
+  .crypto-card, .twitch-card {
+    width: 100%;
     justify-self: stretch;
   }
 
-  .crypto-card, .empty-column {
-    grid-column: 1;
-    justify-self: stretch;
-  }
+  .weather-card { grid-column: 1; grid-row: 1; }
+  .crypto-card { grid-column: 1; grid-row: 2; }
+  .twitch-card { grid-column: 1; grid-row: 3; }
 
   .empty-column {
     display: none;
   }
   
   .glass-card {
+    min-width: 0 !important;
+    max-width: 100%;
+    width: 100%;
     padding: 1.5rem;
-    max-width: none;
   }
 
   .setup-hint {
@@ -290,10 +293,5 @@ body {
 }
 
 @media (max-width: 480px) {
-  .app {
-    margin-top: 40rem;
-  }
-  .header {
-    padding: 2rem 1rem 1rem 1rem;
-  }
+
 }

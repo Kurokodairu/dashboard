@@ -82,17 +82,13 @@ function App() {
       </header>
 
       <main className="dashboard-grid">
-        <div className="left-column">
-          <div className="weather-card">
-            <WeatherCard cityCoords={cityCoords} />
-          </div>
-          <div className="twitch-card">
-            <TwitchCard />
-          </div>
+        <div className="weather-card">
+          <WeatherCard cityCoords={cityCoords} />
         </div>
-        <div className="empty-column">
-          {/* Reserved for future content */}
+        <div className="twitch-card">
+          <TwitchCard />
         </div>
+
         <div className="crypto-card">
           <CryptoCard />
         </div>

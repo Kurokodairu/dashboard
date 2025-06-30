@@ -27,7 +27,7 @@ export default async function handler(req, res) {
 
     // Make request to Twitch API
     const twitchResponse = await fetch(
-      'https://api.twitch.tv/helix/streams/followed',
+      'https://api.twitch.tv/helix/streams/followed?user_id=237308507',
       {
         headers: {
           'Authorization': authorization,
