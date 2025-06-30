@@ -9,52 +9,68 @@ const CryptoCard = () => {
   useEffect(() => {
     const fetchCryptoData = async () => {
       try {
+        setLoading(true)
+        setError(null)
+        
         // Use Vercel function in production, proxy in development
         const apiUrl = import.meta.env.PROD 
           ? '/api/crypto?ids=bitcoin,ethereum,monero,ripple&vs_currencies=usd&include_24hr_change=true'
           : '/coingecko/api/v3/simple/price?ids=bitcoin,ethereum,monero,ripple&vs_currencies=usd&include_24hr_change=true'
 
-        const response = await fetch(apiUrl)
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          signal: AbortSignal.timeout(15000) // 15 second timeout
+        })
 
         if (!response.ok) {
-          throw new Error('Crypto data unavailable')
+          throw new Error(`HTTP ${response.status}: Crypto data unavailable`)
         }
 
         const data = await response.json()
+        
+        // Validate data structure
+        if (!data || typeof data !== 'object') {
+          throw new Error('Invalid data format received')
+        }
         
         const cryptoList = [
           {
             id: 'bitcoin',
             name: 'Bitcoin',
             symbol: 'BTC',
-            price: data.bitcoin.usd,
-            change: data.bitcoin.usd_24h_change
+            price: data.bitcoin?.usd || 0,
+            change: data.bitcoin?.usd_24h_change || 0
           },
           {
             id: 'ethereum',
             name: 'Ethereum',
             symbol: 'ETH',
-            price: data.ethereum.usd,
-            change: data.ethereum.usd_24h_change
+            price: data.ethereum?.usd || 0,
+            change: data.ethereum?.usd_24h_change || 0
           },
           {
             id: 'monero',
             name: 'Monero',
             symbol: 'XMR',
-            price: data.monero.usd,
-            change: data.monero.usd_24h_change
+            price: data.monero?.usd || 0,
+            change: data.monero?.usd_24h_change || 0
           },
           {
-            id: 'xrp',
+            id: 'ripple',
             name: 'Ripple',
             symbol: 'XRP',
-            price: data.ripple.usd,
-            change: data.ripple.usd_24h_change
+            price: data.ripple?.usd || 0,
+            change: data.ripple?.usd_24h_change || 0
           }
         ]
 
         setCryptoData(cryptoList)
       } catch (err) {
+        console.error('Crypto fetch error:', err)
         setError(err.message)
       } finally {
         setLoading(false)

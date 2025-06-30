@@ -21,7 +21,16 @@ export default defineConfig({
         target: 'https://api.coingecko.com',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/coingecko/, ''),
-        secure: true
+        secure: true,
+        timeout: 10000,
+        configure: (proxy, options) => {
+          proxy.on('error', (err, req, res) => {
+            console.log('Proxy error:', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            proxyReq.setHeader('User-Agent', 'Dashboard App (kurokodairuwu@proton.me)');
+          });
+        }
       }
     }
   },
