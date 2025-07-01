@@ -169,13 +169,10 @@ const TwitchCard = () => {
           </button>
           <div className="setup-instructions">
             <p className="text-sm">
-              Make sure to add your <code>VITE_TWITCH_CLIENT_ID</code> to your environment variables
+              Make sure to add <code>VITE_TWITCH_CLIENT_ID</code> to environment variables
             </p>
             <p className="text-sm mt-2">
               <strong>Current redirect URI:</strong> {window.location.origin + window.location.pathname}
-            </p>
-            <p className="text-sm">
-              Add this exact URL to your Twitch app's OAuth Redirect URLs
             </p>
           </div>
         </div>
