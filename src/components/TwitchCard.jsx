@@ -128,7 +128,7 @@ const TwitchCard = () => {
     // Build the auth URL with proper encoding
     const authUrl = `https://id.twitch.tv/oauth2/authorize?` +
       `client_id=${clientId}&` +
-      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+      `redirect_uri=${encodeURIComponent(redirectUri)}/auth/callback&` +
       `response_type=token&` +
       `scope=${encodeURIComponent(scopes)}`
     
