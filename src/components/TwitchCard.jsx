@@ -272,7 +272,7 @@ const TwitchCard = () => {
                 </div>
               </div>
 
-              <div className="stream-title">{stream.title.substring(0, 48)}...</div>
+              <div className="stream-title">{stream.title}</div>
               <div className="stream-game">{stream.game_name}</div>
             </div>
           </div>
@@ -395,6 +395,7 @@ const TwitchCard = () => {
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
+          max-width: 70vw;
         }
 
         .stream-game {
@@ -439,6 +440,7 @@ const TwitchCard = () => {
             align-items: flex-start;
             gap: 0.5rem;
           }
+
         }
       `}</style>
     </div>
