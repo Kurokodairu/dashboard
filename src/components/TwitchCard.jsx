@@ -169,11 +169,8 @@ const TwitchCard = () => {
             Connect to Twitch
           </button>
           <div className="setup-instructions">
-            <p className="text-sm">
-              Make sure to add <code>VITE_TWITCH_CLIENT_ID</code> to environment variables
-            </p>
             <p className="text-sm mt-2">
-              <strong>Current redirect URI:</strong> {window.location.origin + window.location.pathname}
+              <strong>Current redirect URI:</strong> {import.meta.env.VITE_TWITCH_REDIRECT_URI}
             </p>
           </div>
         </div>
@@ -249,7 +246,7 @@ const TwitchCard = () => {
           >
             <div className="stream-thumbnail">
               <img 
-                src={stream.thumbnail_url.replace('{width}', '80').replace('{height}', '45')}
+                src={stream.thumbnail_url.replace('{width}', '320').replace('{height}', '180')}
                 alt={`${stream.user_name} thumbnail`}
                 onError={(e) => {
                   e.target.style.display = 'none'
@@ -315,13 +312,6 @@ const TwitchCard = () => {
           opacity: 0.7;
         }
 
-        .setup-instructions code {
-          background: rgba(255, 255, 255, 0.1);
-          padding: 0.2rem 0.4rem;
-          border-radius: 4px;
-          font-family: monospace;
-        }
-
         .streams-list {
           display: flex;
           flex-direction: column;
@@ -348,8 +338,8 @@ const TwitchCard = () => {
         .stream-thumbnail {
           position: relative;
           flex-shrink: 0;
-          width: 80px;
-          height: 45px;
+          width: 128px;
+          height: 72px;
           border-radius: 8px;
           overflow: hidden;
           background: rgba(255, 255, 255, 0.1);
@@ -433,7 +423,7 @@ const TwitchCard = () => {
           margin-top: 0.5rem;
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 768px) {
           .stream-item {
             flex-direction: column;
             gap: 0.75rem;

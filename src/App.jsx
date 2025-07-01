@@ -95,7 +95,7 @@ function App() {
       </main>
 
       <footer className="footer">
-        <p className="footer-text">Dashboard App by Kurokodairu</p>
+        <p className="footer-text">Dashboard App by <a style={{ color: 'inherit' }} href="https://github.com/Kurokodairu" target="_blank" rel="noopener noreferrer">Kurokodairu</a></p>
       </footer>
 
       <SettingsPanel 
