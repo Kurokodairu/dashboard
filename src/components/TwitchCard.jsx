@@ -122,7 +122,8 @@ const TwitchCard = () => {
     }
 
     // Use the exact current URL without any modifications
-    const redirectUri = window.location.origin + window.location.pathname
+    const redirectUri = import.meta.env.VITE_TWITCH_REDIRECT_URI ||
+      `${window.location.origin}${window.location.pathname}auth/callback`
     const scopes = 'user:read:follows'
     
     // Build the auth URL with proper encoding
