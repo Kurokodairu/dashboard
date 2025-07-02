@@ -4,6 +4,7 @@ import CryptoCard from './components/CryptoCard.jsx'
 import TwitchCard from './components/TwitchCard.jsx'
 import Globe from './components/Globe.jsx'
 import SettingsPanel from './components/SettingsPanel.jsx'
+import SmartSearchBar from './components/SmartSearchBar.jsx'
 import './App.css'
 
 function App() {
@@ -77,9 +78,11 @@ function App() {
           )}
         </div>
         <div className="globe-container">
-          <Globe />
+          <Globe onClick={() => setShowSettings(true)}/>
         </div>
       </header>
+
+      <SmartSearchBar />
 
       <main className="dashboard-grid">
         <div className="weather-card">
@@ -116,7 +119,7 @@ function App() {
       }}
       style={{ cursor: 'pointer' }}
     >
-      <p>Press <kbd>Escape</kbd> or tap here to set your city</p>
+      <p>Press <kbd>Escape</kbd> or tap here to set your city - Use <kbd>Tab</kbd> to switch search engines</p>
     </div>
   )}
     </div>

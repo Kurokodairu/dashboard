@@ -31,7 +31,7 @@ body {
   width: 100%;
   min-height: 100vw;
   position: relative;
-  padding: 2rem 1rem 2rem 1rem;
+  padding: 4rem 1rem 2rem 1rem;
   background: transparent;
 }
 
@@ -202,13 +202,13 @@ body {
   position: fixed;
   bottom: 2rem;
   right: 2rem;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
+  background: rgb(150, 150, 150);
+  backdrop-filter: blur(50px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 12px;
   padding: 1rem 1.5rem;
   font-size: 0.9rem;
-  opacity: 0.8;
+  opacity: 1;
   animation: pulse 2s ease-in-out infinite;
 }
 
