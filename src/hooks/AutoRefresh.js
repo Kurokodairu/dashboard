@@ -20,16 +20,21 @@ export default function useAutoRefresh(refreshFunction, intervalMs = 15 * 60 * 1
     // Set up the interval and event listeners
     const interval = setInterval(handleRefresh, intervalMs);
     window.addEventListener('dashboard-refresh', handleRefresh);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    // document.addEventListener('visibilitychange', handleVisibilityChange); // Uncomment for refresh on visibility change
 
     // Cleanup function to remove listeners and interval when the component unmounts
     return () => {
       clearInterval(interval);
       window.removeEventListener('dashboard-refresh', handleRefresh);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      // document.removeEventListener('visibilitychange', handleVisibilityChange); // Uncomment for cleanup on visibility change
     };
   }, [memoizedRefresh, intervalMs]);
 }
+
+
+
+
+
 
 // this hook can be used in any component like this:
 // import useAutoRefresh from '../hooks/AutoRefresh.js'
