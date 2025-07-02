@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Tv, Users, Eye } from 'lucide-react'
+import useAutoRefresh from '../hooks/AutoRefresh.js'
 
 const TwitchCard = () => {
   const [liveChannels, setLiveChannels] = useState([])
@@ -7,33 +8,22 @@ const TwitchCard = () => {
   const [error, setError] = useState(null)
   const [isConfigured, setIsConfigured] = useState(false)
 
-  useEffect(() => {
-    // Check if Twitch is configured
+  const fetchLiveChannels = useCallback(async () => {
     const clientId = import.meta.env.VITE_TWITCH_CLIENT_ID
     const accessToken = localStorage.getItem('twitch-access-token')
-    
+
     if (!clientId || !accessToken) {
       setIsConfigured(false)
       setLoading(false)
-      return
+      return 
     }
 
+    // If credentials exist, proceed with the fetch.
     setIsConfigured(true)
-    fetchLiveChannels()
-  }, [])
+    setLoading(true)
+    setError(null)
 
-  const fetchLiveChannels = async () => {
     try {
-      setLoading(true)
-      setError(null)
-
-      const clientId = import.meta.env.VITE_TWITCH_CLIENT_ID
-      const accessToken = localStorage.getItem('twitch-access-token')
-
-      if (!clientId || !accessToken) {
-        throw new Error('Twitch credentials not configured')
-      }
-
       // Use Vercel function in production, direct API in development
       const apiUrl = import.meta.env.PROD 
         ? '/api/twitch'
@@ -105,7 +95,10 @@ const TwitchCard = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, []) // This useCallback has no dependencies as it reads from localStorage and env vars directly.
+
+  // Use the single hook to manage all refresh logic
+  useAutoRefresh(fetchLiveChannels)
 
   const formatViewerCount = (count) => {
     if (count >= 1000) {
@@ -121,25 +114,45 @@ const TwitchCard = () => {
       return
     }
 
-    // Use the exact current URL without any modifications
     const redirectUri = import.meta.env.VITE_TWITCH_REDIRECT_URI ||
       `${window.location.origin}${window.location.pathname}auth/callback`
     const scopes = 'user:read:follows'
     
-    // Build the auth URL with proper encoding
     const authUrl = `https://id.twitch.tv/oauth2/authorize?` +
       `client_id=${clientId}&` +
       `redirect_uri=${encodeURIComponent(redirectUri)}&` +
       `response_type=token&` +
       `scope=${encodeURIComponent(scopes)}`
     
-    console.log('Redirect URI being used:', redirectUri)
-    console.log('Full auth URL:', authUrl)
-    
     window.location.href = authUrl
   }
 
-  // Handle OAuth callback
+
+  // Effect for handling logout events
+  useEffect(() => {
+    const handleLogout = () => {
+      localStorage.removeItem('twitch-access-token')
+      setLiveChannels([])
+      setIsConfigured(false)
+    }
+
+    window.addEventListener('twitch-logout', handleLogout)
+    return () => window.removeEventListener('twitch-logout', handleLogout)
+  }, [])
+
+  // Effect for handling login events
+  useEffect(() => {
+    const handleLogin = () => {
+      setIsConfigured(true)
+      fetchLiveChannels() // Manually trigger a fetch on login
+    }
+
+    window.addEventListener('twitch-login', handleLogin)
+    return () => window.removeEventListener('twitch-login', handleLogin)
+  }, [fetchLiveChannels])
+
+
+  // Effect for handling the OAuth callback from Twitch
   useEffect(() => {
     const hash = window.location.hash
     if (hash.includes('access_token')) {
@@ -148,13 +161,13 @@ const TwitchCard = () => {
       
       if (accessToken) {
         localStorage.setItem('twitch-access-token', accessToken)
-        // Clean up URL
         window.history.replaceState({}, document.title, window.location.pathname)
-        // Refresh the component
-        window.location.reload()
+        window.dispatchEvent(new Event('twitch-login')) // Dispatch event to trigger login logic
       }
     }
   }, [])
+
+  // --- Render Logic ---
 
   if (!isConfigured) {
     return (
@@ -170,7 +183,7 @@ const TwitchCard = () => {
           </button>
           <div className="setup-instructions">
             <p className="text-sm mt-2">
-              <strong>Current redirect URI:</strong> {import.meta.env.VITE_TWITCH_REDIRECT_URI}
+              <strong>Current redirect URI:</strong> {import.meta.env.VITE_TWITCH_REDIRECT_URI || 'Not Set'}
             </p>
           </div>
         </div>
@@ -231,7 +244,7 @@ const TwitchCard = () => {
     <div className="glass-card">
       <h2 className="card-title">
         <Tv size={24} />
-        Live Channels ({liveChannels.length})
+        Live Channels <p style={{ color: '#f87171' }}>({liveChannels.length})</p>
       </h2>
       
       <div className="streams-list">
@@ -395,7 +408,7 @@ const TwitchCard = () => {
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          max-width: 70vw;
+          max-width: 80vw;
         }
 
         .stream-game {
@@ -423,8 +436,31 @@ const TwitchCard = () => {
         .mt-2 {
           margin-top: 0.5rem;
         }
+        
+        .twitch-logout {
+          padding: 0 2rem 1rem;
+        }
 
-        @media (max-width: 768px) {
+        .logout-button {
+          width: 100%;
+          background: rgba(145, 70, 255, 0.15);
+          border: 1px solid rgba(145, 70, 255, 0.4);
+          color: #b88cff;
+          padding: 0.75rem 1rem;
+          border-radius: 10px;
+          font-size: 0.95rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .logout-button:hover {
+          background: rgba(145, 70, 255, 0.25);
+          color: #ffffff;
+          border-color: rgba(145, 70, 255, 0.6);
+        }
+
+        @media (max-width: 1156px) {
           .stream-item {
             flex-direction: column;
             gap: 0.75rem;
@@ -440,7 +476,11 @@ const TwitchCard = () => {
             align-items: flex-start;
             gap: 0.5rem;
           }
-
+        }
+        @media (max-width: 640px) {
+          .stream-title {
+            max-width: 65vw;
+          }
         }
       `}</style>
     </div>

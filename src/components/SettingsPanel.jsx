@@ -56,6 +56,25 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity }) => {
     onCitySelect(null)
   }
 
+
+  // TWITCH LOGOUT
+  const [isTwitchLoggedIn, setIsTwitchLoggedIn] = useState(false)
+
+  useEffect(() => {
+    const token = localStorage.getItem('twitch-access-token')
+    setIsTwitchLoggedIn(!!token)
+  }, [isOpen]) // refresh check when settings panel opens
+  const handleTwitchLogout = () => {
+  localStorage.removeItem('twitch-access-token')
+  setIsTwitchLoggedIn(false)
+
+  // Notify parent to update TwitchCard if passed as prop
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('twitch-logout'))
+  }
+}
+
+
   return (
     <>
       {/* Backdrop */}
@@ -141,8 +160,17 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity }) => {
           </div>
         </div>
 
+      {isTwitchLoggedIn && (
+      <div className="twitch-logout">
+        <button className="logout-button" onClick={handleTwitchLogout}>
+          Logout from Twitch
+        </button>
+      </div>
+      )}
+
+
         <div className="settings-footer">
-          <p className="hint">Press <kbd>Escape</kbd> to close</p>
+          <p onClick={onClose} className="hint">Press <kbd>Escape</kbd> to close</p>
         </div>
       </div>
 

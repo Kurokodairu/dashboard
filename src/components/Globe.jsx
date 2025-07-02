@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import createGlobe from 'cobe'
 
-const Globe = () => {
+const Globe = ({onClick}) => {
   const canvasRef = useRef()
   const globeRef = useRef()
 
@@ -76,7 +76,7 @@ const Globe = () => {
   }, [])
 
   return (
-    <div className="globe-wrapper">
+    <div onClick={onClick} className="globe-wrapper">
       <canvas
         ref={canvasRef}
         style={{

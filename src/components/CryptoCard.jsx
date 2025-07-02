@@ -23,7 +23,7 @@ const CryptoCard = () => {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
           },
-          signal: AbortSignal.timeout(15000) // 15 second timeout
+          signal: AbortSignal.timeout(15000)
         })
 
         if (!response.ok) {
@@ -219,7 +219,7 @@ const CryptoCard = () => {
           color: #f87171;
         }
 
-        @media (max-width: 480px) {
+        @media (max-width: 420px) {
           .crypto-info {
             flex-direction: column;
             align-items: flex-start;
