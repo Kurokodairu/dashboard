@@ -8,9 +8,19 @@ const SEARCH_ENGINES = [
 
 const SmartSearchBar = () => {
   const [engineIndex, setEngineIndex] = useState(0)
+  const [isAnimating, setIsAnimating] = useState(false)
   const inputRef = useRef(null)
 
   const currentEngine = SEARCH_ENGINES[engineIndex]
+
+   // Animation handler
+  const animateEngineChange = (nextIndex) => {
+    setIsAnimating(true)
+    setTimeout(() => {
+      setEngineIndex(nextIndex)
+      setIsAnimating(false)
+    }, 250)
+  }
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -25,13 +35,16 @@ const SmartSearchBar = () => {
     if (e.key === 'Tab') {
       e.preventDefault()
       setEngineIndex((prev) => (prev + 1) % SEARCH_ENGINES.length)
+      animateEngineChange((engineIndex + 1) % SEARCH_ENGINES.length)
     }
   }
 
   return (
     <form className="search-bar" onSubmit={handleSubmit}>
       <div className="search-wrapper">
-        <span className="search-icon">{currentEngine.icon}</span>
+        <span className={`search-icon fade-anim ${isAnimating ? 'fade' : ''}`}>
+          {currentEngine.icon} 
+        </span>
         <input
           type="text"
           ref={inputRef}
@@ -40,7 +53,15 @@ const SmartSearchBar = () => {
           onKeyDown={handleKeyDown}
           autoFocus
         />
-        <span onClick={() => setEngineIndex((prev) => (prev + 1) % SEARCH_ENGINES.length)} className="engine-badge">{currentEngine.name}</span>
+        <span
+          onClick={() => {
+            animateEngineChange((prev) => (prev + 1) % SEARCH_ENGINES.length)
+            setEngineIndex((prev) => (prev + 1) % SEARCH_ENGINES.length)
+          }}
+          className={`engine-badge fade-anim ${isAnimating ? 'fade' : ''}`}
+        >
+          {currentEngine.name}
+        </span>
       </div>
 
       <style>{`
@@ -96,6 +117,14 @@ const SmartSearchBar = () => {
           color: white;
           font-weight: 500;
           cursor: pointer;
+        }
+
+        .fade-anim.fade {
+          opacity: 0.2;
+        }
+        .fade-anim {
+          opacity: 1;
+          transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         @media (max-width: 480px) {

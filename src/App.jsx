@@ -40,16 +40,6 @@ function App() {
     localStorage.setItem('dashboard-layout', JSON.stringify(widgetLayout))
   }, [widgetLayout])
 
-
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date())
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [])
-
   useEffect(() => {
     // Load saved city from localStorage on app start
     const savedCity = localStorage.getItem('dashboard-city')
@@ -76,6 +66,15 @@ function App() {
     localStorage.setItem('dashboard-city', JSON.stringify(cityData))
     setShowSettings(false)
   }
+
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
 
   const formatTime = (date) => {
     return date.toLocaleTimeString('nb-NO', {
@@ -107,6 +106,7 @@ function App() {
             <p className="location">{cityCoords.name}, {cityCoords.country}</p>
           )}
         </div>
+
         <div className="globe-container">
           <Globe onClick={() => setShowSettings(true)}/>
         </div>
