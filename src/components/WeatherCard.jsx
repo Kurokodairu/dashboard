@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Cloud, Wind} from 'lucide-react'
+import { Cloud, Wind } from 'lucide-react'
 
 const WeatherCard = ({ cityCoords }) => {
   const [weather, setWeather] = useState(null)
@@ -13,45 +13,54 @@ const WeatherCard = ({ cityCoords }) => {
       return
     }
 
+    const cacheKey = `weather-${cityCoords.latitude}-${cityCoords.longitude}`
+    const cached = localStorage.getItem(cacheKey)
+    const twoHours = 1000 * 60 * 60 * 2
+
+    if (cached) {
+      const { data, timestamp } = JSON.parse(cached)
+      const age = Date.now() - timestamp
+      if (age < twoHours) {
+        setWeather({ ...data, _fetchedAt: timestamp })
+        return
+      }
+    }
+
     const fetchWeather = async () => {
       setLoading(true)
       setError(null)
-      
+
       try {
         const { latitude, longitude } = cityCoords
-
-        // Use Vercel function in production, proxy in development
-        const apiUrl = import.meta.env.PROD 
+        const apiUrl = import.meta.env.PROD
           ? `/api/weather?lat=${latitude}&lon=${longitude}`
           : `/weather?lat=${latitude}&lon=${longitude}`
 
         const response = await fetch(apiUrl)
-
-        if (!response.ok) {
-          throw new Error('Weather data unavailable')
-        }
+        if (!response.ok) throw new Error('Weather data unavailable')
 
         const data = await response.json()
-        
-        // Check if the expected data structure exists
-        if (!data.properties || !data.properties.timeseries || data.properties.timeseries.length === 0) {
-          throw new Error('Invalid weather data structure')
-        }
-        
-        const current = data.properties.timeseries[0].data.instant.details
-        const next1h = data.properties.timeseries[0].data.next_1_hours?.summary?.symbol_code
-        const next6h = data.properties.timeseries[0].data.next_6_hours?.summary?.symbol_code
-        
-        setWeather({
+        const current = data.properties?.timeseries?.[0]?.data?.instant?.details
+        const next1h = data.properties?.timeseries?.[0]?.data?.next_1_hours?.summary?.symbol_code
+        const next6h = data.properties?.timeseries?.[0]?.data?.next_6_hours?.summary?.symbol_code
+        const rain6h = data.properties?.timeseries?.[0]?.data?.next_6_hours?.details?.precipitation_amount || 0
+
+        const parsed = {
           temperature: Math.round(current.air_temperature),
-          windSpeed: Math.round(current.wind_speed * 3.6), // Convert m/s to km/h
+          windSpeed: Math.round(current.wind_speed * 3.6),
           condition: next1h || 'clearsky_day',
           next6hCode: next6h || 'clearsky_day',
-          next6hRain: data.properties.timeseries[0].data.next_6_hours?.details?.precipitation_amount || 0,
-        })
+          next6hRain: rain6h,
+          _fetchedAt: Date.now()
+        }
 
-
+        setWeather(parsed)
+        localStorage.setItem(cacheKey, JSON.stringify({
+          data: parsed,
+          timestamp: parsed._fetchedAt
+        }))
       } catch (err) {
+        console.error('Weather fetch failed:', err)
         setError(err.message)
         setWeather(null)
       } finally {
@@ -62,17 +71,10 @@ const WeatherCard = ({ cityCoords }) => {
     fetchWeather()
   }, [cityCoords])
 
-
   const getWeatherIcon = (condition) => {
-  const iconUrl = `/icons/${condition}.svg`
-  return (
-    <img
-      src={iconUrl}
-      alt={condition}
-      style={{ width: '48px', height: '48px' }}
-    />
-  )
-}
+    const iconUrl = `/icons/${condition}.svg`
+    return <img src={iconUrl} alt={condition} style={{ width: '48px', height: '48px' }} />
+  }
 
   const getWeatherDescription = (condition) => {
     if (condition.includes('rain')) return 'Rainy'
@@ -80,6 +82,13 @@ const WeatherCard = ({ cityCoords }) => {
     if (condition.includes('cloud')) return 'Cloudy'
     if (condition.includes('clear')) return 'Clear'
     return 'Fair'
+  }
+
+  const getTooltip = () => {
+    if (!weather?._fetchedAt) return ''
+    const updated = new Date(weather._fetchedAt).toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })
+    const expires = new Date(weather._fetchedAt + 2 * 60 * 60 * 1000).toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })
+    return `Updated: ${updated}\nExpires: ${expires}`
   }
 
   if (!cityCoords) {
@@ -132,10 +141,10 @@ const WeatherCard = ({ cityCoords }) => {
         <Cloud size={24} />
         Weather
       </h2>
-      
+
       <div className="weather-content">
         <div className="weather-main">
-          <div className="weather-icon">
+          <div className="weather-icon" title={getTooltip()}>
             {getWeatherIcon(weather.condition)}
           </div>
           <div className="weather-info">
@@ -143,14 +152,11 @@ const WeatherCard = ({ cityCoords }) => {
             <div className="condition">{getWeatherDescription(weather.condition)}</div>
           </div>
         </div>
-        
+
         <div className="weather-details">
           <div className="weather-detail">
-            {/* Next 6 hours icon and description */}
-            {weather.next6hCode ? getWeatherIcon(weather.next6hCode) : getWeatherIcon('clearsky_day')}
-            <span>
-              {weather.next6hCode ? getWeatherDescription(weather.next6hCode) : 'Clear'}
-            </span>
+            {getWeatherIcon(weather.next6hCode)}
+            <span>{getWeatherDescription(weather.next6hCode)}</span>
             <small>{weather.next6hRain} mm</small>
           </div>
 
@@ -160,7 +166,6 @@ const WeatherCard = ({ cityCoords }) => {
             <small>Wind</small>
           </div>
         </div>
-
       </div>
 
       <style>{`
