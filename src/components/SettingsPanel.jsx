@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { X, Search, MapPin, Settings } from 'lucide-react'
+import { X, Search, MapPin, Settings, ArrowUp, ArrowDown, ArrowLeftRight } from 'lucide-react'
 
-const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, visibleWidgets, onToggleWidget }) => {
+const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayout, setWidgetLayout }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [loading, setLoading] = useState(false)
@@ -58,21 +58,100 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, visibleWidg
 
 
   // Widget management
-  const moveWidgetUp = (id) => {
+  const handleToggleVisibility = (id) => {
+    setWidgetLayout(prev =>
+      prev.map(w => w.id === id ? { ...w, visible: !w.visible } : w)
+    )
+  }
+
+
+  const normalizeOrderValues = (layout) => {
+    const columns = ['left', 'right']
+    
+    return layout.map(widget => {
+      const sameColumnWidgets = layout
+        .filter(w => w.column === widget.column)
+        .sort((a, b) => a.order - b.order || layout.indexOf(a) - layout.indexOf(b)) // fallback to original array position
+      
+      const newOrder = sameColumnWidgets.findIndex(w => w.id === widget.id) + 1
+      
+      return { ...widget, order: newOrder }
+    })
+  }
+
+  const handleMoveUp = (id) => {
     setWidgetLayout(prev => {
-      const updated = [...prev]
-      const index = updated.findIndex(w => w.id === id)
-      if (index > 0) {
-        [updated[index], updated[index - 1]] = [updated[index - 1], updated[index]]
-      }
+      const normalized = normalizeOrderValues(prev)
+      
+      const widget = normalized.find(w => w.id === id)
+      if (!widget) return prev
+
+      // Get widgets in the same column, sorted by order
+      const sameColumnWidgets = normalized
+        .filter(w => w.column === widget.column)
+        .sort((a, b) => a.order - b.order)
+      
+      const index = sameColumnWidgets.findIndex(w => w.id === id)
+      
+      if (index <= 0) return normalized
+
+      const updated = [...normalized]
+      const currentWidget = updated.find(w => w.id === id)
+      const previousWidget = updated.find(w => w.id === sameColumnWidgets[index - 1].id)
+      
+      const tempOrder = currentWidget.order
+      currentWidget.order = previousWidget.order
+      previousWidget.order = tempOrder
+      
       return updated
     })
   }
 
-  const toggleColumn = (id) => {
-    setWidgetLayout(prev => prev.map(w =>
-      w.id === id ? { ...w, column: w.column === 'left' ? 'right' : 'left' } : w
-    ))
+  const handleMoveDown = (id) => {
+    setWidgetLayout(prev => {
+      const normalized = normalizeOrderValues(prev)
+      
+      const widget = normalized.find(w => w.id === id)
+      if (!widget) return prev
+
+      const sameColumnWidgets = normalized
+        .filter(w => w.column === widget.column)
+        .sort((a, b) => a.order - b.order)
+      
+      const index = sameColumnWidgets.findIndex(w => w.id === id)
+      
+      if (index >= sameColumnWidgets.length - 1) return normalized
+
+      const updated = [...normalized]
+      const currentWidget = updated.find(w => w.id === id)
+      const nextWidget = updated.find(w => w.id === sameColumnWidgets[index + 1].id)
+      
+      const tempOrder = currentWidget.order
+      currentWidget.order = nextWidget.order
+      nextWidget.order = tempOrder
+      
+      return updated
+    })
+  }
+
+  const handleToggleColumn = (id) => {
+    setWidgetLayout(prev => {
+      const widget = prev.find(w => w.id === id)
+      if (!widget) return prev
+
+      const newColumn = widget.column === 'left' ? 'right' : 'left'
+      
+      const targetColumnWidgets = prev.filter(w => w.column === newColumn)
+      const maxOrder = targetColumnWidgets.length > 0 
+        ? Math.max(...targetColumnWidgets.map(w => w.order))
+        : 0
+
+      return prev.map(w =>
+        w.id === id
+          ? { ...w, column: newColumn, order: maxOrder + 1 }
+          : w
+      )
+    })
   }
 
 
@@ -82,12 +161,10 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, visibleWidg
   useEffect(() => {
     const token = localStorage.getItem('twitch-access-token')
     setIsTwitchLoggedIn(!!token)
-  }, [isOpen]) // refresh check when settings panel opens
+  }, [isOpen])
   const handleTwitchLogout = () => {
   localStorage.removeItem('twitch-access-token')
   setIsTwitchLoggedIn(false)
-
-  // Notify parent to update TwitchCard if passed as prop
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event('twitch-logout'))
   }
@@ -117,10 +194,6 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, visibleWidg
         <div className="settings-content">
           <div className="setting-section">
             <h3>Location</h3>
-            <p className="setting-description">
-              Set your city to get accurate weather information
-            </p>
-            
             {currentCity && (
               <div className="current-city">
                 <MapPin size={16} />
@@ -176,28 +249,30 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, visibleWidg
                 </div>
               )}
             </div>
+          <div className="widget-settings">
+          <h3>Widgets</h3>
+            {widgetLayout
+              
+              .map(widget => (
+                <div key={widget.id} className="widget-control">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={widget.visible}
+                      onChange={() => handleToggleVisibility(widget.id)}
+                    />
+                    {widget.id.charAt(0).toUpperCase() + widget.id.slice(1)}
+                  </label>
+                  <div className="widget-actions">
+                    <button onClick={() => handleMoveUp(widget.id)}><ArrowUp size={16} /></button>
+                    <button onClick={() => handleMoveDown(widget.id)}><ArrowDown size={16} /></button>
+                    <button onClick={() => handleToggleColumn(widget.id)}><ArrowLeftRight size={16} /></button>
+                      </div>
+                </div>
+              ))}
           </div>
-        </div>
-
-
-      <h3>Widgets</h3>
-      {Object.entries(visibleWidgets).map(([key, value]) => (
-        <label key={key} className="widget-toggle">
-          <input
-              type="checkbox"
-              checked={value}
-              onChange={() => onToggleWidget(key, !value)}
-          />
-          <span>{key.charAt(0).toUpperCase() + key.slice(1)} Widget</span>
-        </label>
-      ))}
- 
-        
-      <button onClick={() => moveWidgetUp(widget.id)}>↑</button>
-      <button onClick={() => moveWidgetDown(widget.id)}>↓</button>
-      <button onClick={() => toggleColumn(widget.id)}>⇄</button>
-
-
+       </div>
+      </div>
       {isTwitchLoggedIn && (
       <div className="twitch-logout">
         <button className="logout-button" onClick={handleTwitchLogout}>
@@ -205,7 +280,6 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, visibleWidg
         </button>
       </div>
       )}
-
 
         <div className="settings-footer">
           <p onClick={onClose} className="hint">Press <kbd>Escape</kbd> to close</p>
@@ -219,8 +293,8 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, visibleWidg
           left: 0;
           width: 100%;
           height: 100%;
-          background: rgba(0, 0, 0, 0.3);
-          backdrop-filter: blur(4px);
+          background: rgba(0, 0, 0, 0.4);
+          backdrop-filter: blur(8px);
           z-index: 998;
           opacity: 0;
           visibility: hidden;
@@ -238,7 +312,7 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, visibleWidg
           right: 0;
           width: 400px;
           height: 100vh;
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(255, 255, 255, 0.15);
           backdrop-filter: blur(20px);
           border-left: 1px solid rgba(255, 255, 255, 0.2);
           z-index: 999;
@@ -464,12 +538,6 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, visibleWidg
           font-family: monospace;
         }
 
-        .widget-toggle {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          margin: 0.25rem 0;
-        }
 
 
         .twitch-logout {
@@ -495,6 +563,157 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, visibleWidg
           border-color: rgba(145, 70, 255, 0.6);
         }
 
+        /* Widget controls */
+        .widget-settings {
+          margin-top: 1.5rem;
+        }
+
+        .widget-control {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1rem;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          margin-bottom: 0.75rem;
+          transition: all 0.2s ease;
+        }
+
+        .widget-control:hover {
+          background: rgba(255, 255, 255, 0.08);
+          border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .widget-control label {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          cursor: pointer;
+          font-size: 1rem;
+          font-weight: 500;
+          flex: 1;
+          text-shadow: 
+            0 1px 2px rgba(0, 0, 0, 0.6),
+            0 0 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .widget-control input[type="checkbox"] {
+          width: 18px;
+          height: 18px;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          border-radius: 4px;
+          cursor: pointer;
+          position: relative;
+          appearance: none;
+          transition: all 0.2s ease;
+        }
+
+        .widget-control input[type="checkbox"]:checked {
+          background: rgba(255, 255, 255, 0.2);
+          border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .widget-control input[type="checkbox"]:checked::after {
+          content: '✓';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          color: white;
+          font-size: 12px;
+          font-weight: bold;
+        }
+
+        .widget-control input[type="checkbox"]:hover {
+          background: rgba(255, 255, 255, 0.15);
+        }
+
+        .widget-actions {
+          display: flex;
+          gap: 0.5rem;
+        }
+
+        .widget-actions button {
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          color: white;
+          padding: 0.5rem;
+          border-radius: 8px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+          width: 36px;
+          height: 36px;
+        }
+
+        .widget-actions button:hover {
+          background: rgba(255, 255, 255, 0.2);
+          border-color: rgba(255, 255, 255, 0.3);
+          transform: translateY(-1px);
+        }
+
+        .widget-actions button:active {
+          transform: translateY(0);
+        }
+
+        .widget-actions button:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+          transform: none;
+        }
+
+        .widget-actions button:disabled:hover {
+          background: rgba(255, 255, 255, 0.1);
+          border-color: rgba(255, 255, 255, 0.2);
+          transform: none;
+        }
+
+        /* Add some spacing between sections */
+        .setting-section:not(:last-child) {
+          margin-bottom: 2.5rem;
+        }
+
+        .setting-section h3 {
+          font-size: 1.2rem;
+          font-weight: 600;
+          margin-bottom: 1rem;
+          color: white;
+        }
+
+        /* Improve the overall layout */
+        .settings-content {
+          flex: 1;
+          padding: 2rem;
+          overflow-y: auto;
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+
+        .settings-content::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .settings-content::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .settings-content::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 3px;
+        }
+
+        .settings-content::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
 
         @media (max-width: 480px) {
           .settings-panel {

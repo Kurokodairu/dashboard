@@ -41,20 +41,6 @@ function App() {
   }, [widgetLayout])
 
 
-  const [visibleWidgets, setVisibleWidgets] = useState(() => {
-    const saved = localStorage.getItem('widget-visibility')
-    return saved ? JSON.parse(saved) : defaultLayout
-  })
-
-  const updateWidgetVisibility = (widgetKey, isVisible) => {
-    const updated = {
-      ...visibleWidgets,
-      [widgetKey]: isVisible
-    }
-    setVisibleWidgets(updated)
-    localStorage.setItem('widget-visibility', JSON.stringify(updated))
-  }
-
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -162,8 +148,8 @@ function App() {
         onClose={() => setShowSettings(false)}
         onCitySelect={handleCitySelect}
         currentCity={cityCoords}
-        visibleWidgets={visibleWidgets}
-        onToggleWidget={updateWidgetVisibility}
+        widgetLayout={widgetLayout}
+        setWidgetLayout={setWidgetLayout}
       />
 
 

@@ -177,7 +177,6 @@ const TwitchCard = () => {
           Live Channels
         </h2>
         <div className="twitch-setup">
-          <p>Connect your Twitch account to see live channels you follow</p>
           <button className="connect-button" onClick={handleTwitchAuth}>
             Connect to Twitch
           </button>
@@ -234,7 +233,6 @@ const TwitchCard = () => {
         </h2>
         <div className="no-streams">
           <p>No followed channels are currently live</p>
-          <p className="text-sm mt-2">Check back later!</p>
         </div>
       </div>
     )
