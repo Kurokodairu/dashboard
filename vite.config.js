@@ -43,7 +43,14 @@ export default defineConfig({
             console.log('Twitch proxy error:', err);
           });
         }
-      }
+      },
+      '/suggest': {
+        target: 'https://suggestqueries.google.com',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) =>
+          path.replace(/^\/suggest/, '/complete/search?client=firefox&q='),
+      },
     }
   },
 })

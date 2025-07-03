@@ -1,5 +1,8 @@
-import { useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Search, Bot } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { div } from 'framer-motion/client'
+
 
 const SEARCH_ENGINES = [
   { name: 'Google', url: 'https://www.google.com/search?q=', icon: <Search size={18} /> },
@@ -10,6 +13,10 @@ const SmartSearchBar = () => {
   const [engineIndex, setEngineIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
   const inputRef = useRef(null)
+  const [inputText, setInputText] = useState('')
+  const [suggestions, setSuggestions] = useState([])
+  const [focusedIndex, setFocusedIndex] = useState(-1)
+
 
   const currentEngine = SEARCH_ENGINES[engineIndex]
 
@@ -22,47 +29,150 @@ const SmartSearchBar = () => {
     }, 250)
   }
 
+  //Auto-suggest
+  useEffect(() => {
+    if (!inputText.trim()) {
+      setSuggestions([])
+      return
+    }
+
+    const apiUrl = import.meta.env.PROD 
+          ? `/api/suggest${encodeURIComponent(inputText)}`
+          : `/suggest${encodeURIComponent(inputText)}`
+
+    const controller = new AbortController()
+    const fetchSuggestions = async () => {
+      try {
+        const res = await fetch(apiUrl, {
+          signal: controller.signal
+        })
+        const data = await res.json()
+        setSuggestions(data[1] || [])
+      } catch (err) {
+        if (err.name !== 'AbortError') console.error(err)
+      }
+    }
+
+    const debounce = setTimeout(fetchSuggestions, 200)
+    return () => {
+      controller.abort()
+      clearTimeout(debounce)
+    }
+  }, [inputText])
+
+
   const handleSubmit = (e) => {
     e.preventDefault()
-    const query = inputRef.current.value.trim()
+    const query = inputText.trim()
     if (!query) return
 
     window.open(`${currentEngine.url}${encodeURIComponent(query)}`, '_blank')
-    inputRef.current.value = ''
+    setInputText('')
   }
 
   const handleKeyDown = (e) => {
     if (e.key === 'Tab') {
       e.preventDefault()
-      setEngineIndex((prev) => (prev + 1) % SEARCH_ENGINES.length)
       animateEngineChange((engineIndex + 1) % SEARCH_ENGINES.length)
     }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setFocusedIndex((prev) => Math.min(prev + 1, suggestions.length - 1))
+      setTimeout(() => {
+        const focusedElement = document.querySelector('.suggestion-item.focused')
+        if (focusedElement) {
+          focusedElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest'
+          })
+        }
+      }, 0)
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setFocusedIndex((prev) => Math.max(prev - 1, -1))
+      setTimeout(() => {
+        const focusedElement = document.querySelector('.suggestion-item.focused')
+        if (focusedElement) {
+          focusedElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest'
+          })
+        }
+      }, 0)
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      const selected = focusedIndex >= 0 ? suggestions[focusedIndex] : inputText
+      if (!selected.trim()) return
+      window.open(`${currentEngine.url}${encodeURIComponent(selected)}`, '_blank')
+      setInputText('')
+      setSuggestions([])
+      setFocusedIndex(-1)
+    }
+    
   }
 
   return (
+    <div>
     <form className="search-bar" onSubmit={handleSubmit}>
       <div className="search-wrapper">
         <span className={`search-icon fade-anim ${isAnimating ? 'fade' : ''}`}>
-          {currentEngine.icon} 
+          {currentEngine.icon}
         </span>
         <input
-          type="text"
           ref={inputRef}
-          className="search-input"
-          placeholder={`Search with ${currentEngine.name}...`}
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
           onKeyDown={handleKeyDown}
+          placeholder={`Search with ${currentEngine.name}...`}
+          className="search-input"
           autoFocus
         />
         <span
-          onClick={() => {
-            animateEngineChange((prev) => (prev + 1) % SEARCH_ENGINES.length)
-            setEngineIndex((prev) => (prev + 1) % SEARCH_ENGINES.length)
-          }}
           className={`engine-badge fade-anim ${isAnimating ? 'fade' : ''}`}
+          onClick={() => {
+            animateEngineChange((engineIndex + 1) % SEARCH_ENGINES.length)
+          }}
         >
           {currentEngine.name}
         </span>
+
+        {/* SUGGESTIONS */}
+        <AnimatePresence>
+          {suggestions.length > 0 && (
+            <motion.ul
+              className="suggestions-list"
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -5 }}
+              transition={{ duration: 0.2 }}
+            >
+              {suggestions.map((s, i) => (
+                <li
+                  key={i}
+                  className={`suggestion-item ${i === focusedIndex ? 'focused' : ''}`}
+                  onMouseDown={() => {
+                    window.open(`${currentEngine.url}${encodeURIComponent(s)}`, '_blank')
+                    setInputText('')
+                    setSuggestions([])
+                    setFocusedIndex(-1)
+                  }}
+                >
+                  {s}
+                </li>
+              ))}
+            </motion.ul>
+          )}
+        </AnimatePresence>
       </div>
+      </form>
+
+       <motion.div
+        className="suggestion-spacer"
+        animate={{ height: suggestions.length > 0 ? 200 : 0 }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
+      />
+
 
       <style>{`
         .search-bar {
@@ -119,6 +229,51 @@ const SmartSearchBar = () => {
           cursor: pointer;
         }
 
+
+        .suggestions-list {
+          position: absolute;
+          top: 100%;
+          left: 0;
+          right: 0;
+          background: rgba(255, 255, 255, 0.05);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-top: none;
+          border-radius: 0 0 12px 12px;
+          max-height: 220px;
+          overflow-y: auto;
+          z-index: 10;
+          margin-top: -1px;
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .suggestion-item {
+          padding: 0.75rem 1.25rem;
+          font-size: 0.95rem;
+          color: white;
+          cursor: pointer;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          transition: background 0.2s ease;
+        }
+
+        .suggestion-item:last-child {
+          border-bottom: none;
+        }
+
+        .suggestion-item:hover,
+        .suggestion-item.focused {
+          background: rgba(255, 255, 255, 0.1);
+        }
+
+
+        @media (max-width: 480px) {
+          .suggestions-list {
+            max-height: 160px;
+            font-size: 0.85rem;
+
+          }
+        }
+
         .fade-anim.fade {
           opacity: 0.2;
         }
@@ -127,13 +282,12 @@ const SmartSearchBar = () => {
           transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        @media (max-width: 480px) {
-          .search-wrapper {
-            max-width: 90%;
-          }
+        @media (min-width: 1156px) {
+        .suggestion-spacer {
+          display: none;
         }
       `}</style>
-    </form>
+      </div>
   )
 }
 

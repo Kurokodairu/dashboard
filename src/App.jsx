@@ -5,6 +5,7 @@ import TwitchCard from './components/TwitchCard.jsx'
 import Globe from './components/Globe.jsx'
 import SettingsPanel from './components/SettingsPanel.jsx'
 import SmartSearchBar from './components/SmartSearchBar.jsx'
+import { motion } from 'framer-motion'
 import './App.css'
 
 function App() {
@@ -113,7 +114,6 @@ function App() {
       </header>
 
       <SmartSearchBar />
-
       <main className="dashboard-columns">
         <div className="left-column">
           {widgetLayout
