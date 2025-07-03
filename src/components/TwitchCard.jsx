@@ -437,28 +437,6 @@ const TwitchCard = () => {
           margin-top: 0.5rem;
         }
         
-        .twitch-logout {
-          padding: 0 2rem 1rem;
-        }
-
-        .logout-button {
-          width: 100%;
-          background: rgba(145, 70, 255, 0.15);
-          border: 1px solid rgba(145, 70, 255, 0.4);
-          color: #b88cff;
-          padding: 0.75rem 1rem;
-          border-radius: 10px;
-          font-size: 0.95rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .logout-button:hover {
-          background: rgba(145, 70, 255, 0.25);
-          color: #ffffff;
-          border-color: rgba(145, 70, 255, 0.6);
-        }
 
         @media (max-width: 1156px) {
           .stream-item {

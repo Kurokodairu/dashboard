@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { X, Search, MapPin, Settings } from 'lucide-react'
 
-const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity }) => {
+const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, visibleWidgets, onToggleWidget }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [loading, setLoading] = useState(false)
@@ -54,6 +54,25 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity }) => {
   const handleClearCity = () => {
     localStorage.removeItem('dashboard-city')
     onCitySelect(null)
+  }
+
+
+  // Widget management
+  const moveWidgetUp = (id) => {
+    setWidgetLayout(prev => {
+      const updated = [...prev]
+      const index = updated.findIndex(w => w.id === id)
+      if (index > 0) {
+        [updated[index], updated[index - 1]] = [updated[index - 1], updated[index]]
+      }
+      return updated
+    })
+  }
+
+  const toggleColumn = (id) => {
+    setWidgetLayout(prev => prev.map(w =>
+      w.id === id ? { ...w, column: w.column === 'left' ? 'right' : 'left' } : w
+    ))
   }
 
 
@@ -159,6 +178,25 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity }) => {
             </div>
           </div>
         </div>
+
+
+      <h3>Widgets</h3>
+      {Object.entries(visibleWidgets).map(([key, value]) => (
+        <label key={key} className="widget-toggle">
+          <input
+              type="checkbox"
+              checked={value}
+              onChange={() => onToggleWidget(key, !value)}
+          />
+          <span>{key.charAt(0).toUpperCase() + key.slice(1)} Widget</span>
+        </label>
+      ))}
+ 
+        
+      <button onClick={() => moveWidgetUp(widget.id)}>↑</button>
+      <button onClick={() => moveWidgetDown(widget.id)}>↓</button>
+      <button onClick={() => toggleColumn(widget.id)}>⇄</button>
+
 
       {isTwitchLoggedIn && (
       <div className="twitch-logout">
@@ -425,6 +463,38 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity }) => {
           font-size: 0.7rem;
           font-family: monospace;
         }
+
+        .widget-toggle {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin: 0.25rem 0;
+        }
+
+
+        .twitch-logout {
+          padding: 0 2rem 1rem;
+        }
+
+        .logout-button {
+          width: 100%;
+          background: rgba(145, 70, 255, 0.15);
+          border: 1px solid rgba(145, 70, 255, 0.4);
+          color: #b88cff;
+          padding: 0.75rem 1rem;
+          border-radius: 10px;
+          font-size: 0.95rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .logout-button:hover {
+          background: rgba(145, 70, 255, 0.25);
+          color: #ffffff;
+          border-color: rgba(145, 70, 255, 0.6);
+        }
+
 
         @media (max-width: 480px) {
           .settings-panel {

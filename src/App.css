@@ -95,35 +95,31 @@ body {
   flex-shrink: 0;
 }
 
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+.dashboard-columns {
+  display: flex;
   gap: 2rem;
+  align-items: stretch;
   width: 100%;
-  margin: 0 auto;
-  
+  flex-wrap: wrap;
 }
 
-.weather-card {
-  grid-column: 1;
-  justify-self: start;
+.left-column,
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  flex: 1;
+  min-width: 300px;
 }
 
-.twitch-card {
-  grid-column: 1;
-  justify-self: start;
+.left-column {
+  align-items: flex-start; 
 }
 
-.crypto-card {
-  grid-column: 3;
-  justify-self: end;
+.right-column {
+  align-items: flex-end; 
 }
 
-
-
-.weather-card { grid-column: 1; grid-row: 1; }
-.crypto-card { grid-column: 3; grid-row: 1; }
-.twitch-card { grid-column: 1; grid-row: 2; }
 
 
 .glass-card {
@@ -250,27 +246,15 @@ body {
     overflow: visible;
   }
 
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    margin: 0;
-    width: 100%;
-  }
   
   .time {
     font-size: 3rem;
   }
   
-
-  .weather-card,
-  .crypto-card, .twitch-card {
-    width: 100%;
-    justify-self: stretch;
+  .left-column, .right-column {
+    align-items: stretch;
   }
 
-  .weather-card { grid-column: 1; grid-row: 1; }
-  .crypto-card { grid-column: 1; grid-row: 2; }
-  .twitch-card { grid-column: 1; grid-row: 3; }
 
   .glass-card {
     min-width: 0 !important;

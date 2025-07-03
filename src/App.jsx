@@ -12,6 +12,50 @@ function App() {
   const [showSettings, setShowSettings] = useState(false)
   const [cityCoords, setCityCoords] = useState(null)
 
+  const defaultLayout = [
+  { id: 'weather', column: 'left', order: 1, visible: true },
+  { id: 'twitch', column: 'left', order: 2, visible: true },
+  { id: 'crypto', column: 'right', order: 1, visible: true }
+  ]
+
+  const [widgetLayout, setWidgetLayout] = useState(() => {
+  const saved = localStorage.getItem('dashboard-layout')
+  return saved ? JSON.parse(saved) : defaultLayout
+  })
+
+  const renderWidgetById = (id) => {
+    switch (id) {
+      case 'weather':
+        return <WeatherCard cityCoords={cityCoords} />
+      case 'twitch':
+        return <TwitchCard />
+      case 'crypto':
+        return <CryptoCard />
+      default:
+        return null
+    }
+  }
+
+  useEffect(() => {
+    localStorage.setItem('dashboard-layout', JSON.stringify(widgetLayout))
+  }, [widgetLayout])
+
+
+  const [visibleWidgets, setVisibleWidgets] = useState(() => {
+    const saved = localStorage.getItem('widget-visibility')
+    return saved ? JSON.parse(saved) : defaultLayout
+  })
+
+  const updateWidgetVisibility = (widgetKey, isVisible) => {
+    const updated = {
+      ...visibleWidgets,
+      [widgetKey]: isVisible
+    }
+    setVisibleWidgets(updated)
+    localStorage.setItem('widget-visibility', JSON.stringify(updated))
+  }
+
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date())
@@ -84,29 +128,44 @@ function App() {
 
       <SmartSearchBar />
 
-      <main className="dashboard-grid">
-        <div className="weather-card">
-          <WeatherCard cityCoords={cityCoords} />
-        </div>
-        <div className="twitch-card">
-          <TwitchCard />
+      <main className="dashboard-columns">
+        <div className="left-column">
+          {widgetLayout
+            .filter(w => w.column === 'left' && w.visible)
+            .sort((a, b) => a.order - b.order)
+            .map(w => (
+              <div className="widget" key={w.id}>
+                {renderWidgetById(w.id)}
+              </div>
+            ))}
         </div>
 
-        <div className="crypto-card">
-          <CryptoCard />
+        <div className="right-column">
+          {widgetLayout
+            .filter(w => w.column === 'right' && w.visible)
+            .sort((a, b) => a.order - b.order)
+            .map(w => (
+              <div className="widget" key={w.id}>
+                {renderWidgetById(w.id)}
+              </div>
+            ))}
         </div>
       </main>
+
 
       <footer className="footer">
         <p className="footer-text">Dashboard App by <a style={{ color: 'inherit' }} href="https://github.com/Kurokodairu" target="_blank" rel="noopener noreferrer">Kurokodairu</a></p>
       </footer>
 
-      <SettingsPanel 
+      <SettingsPanel
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
         onCitySelect={handleCitySelect}
         currentCity={cityCoords}
+        visibleWidgets={visibleWidgets}
+        onToggleWidget={updateWidgetVisibility}
       />
+
 
   {!cityCoords && (
     <div
