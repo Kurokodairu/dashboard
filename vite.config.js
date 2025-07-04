@@ -51,6 +51,11 @@ export default defineConfig({
         rewrite: (path) =>
           path.replace(/^\/suggest/, '/complete/search?client=firefox&q='),
       },
+      '/github': {
+        target: 'https://api.github.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/github/, '/users'),
+      }
     }
   },
 })

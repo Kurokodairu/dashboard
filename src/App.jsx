@@ -5,19 +5,27 @@ import TwitchCard from './components/TwitchCard.jsx'
 import Globe from './components/Globe.jsx'
 import SettingsPanel from './components/SettingsPanel.jsx'
 import SmartSearchBar from './components/SmartSearchBar.jsx'
-import { motion } from 'framer-motion'
+import GithubCard from './components/GithubCard.jsx'
+import FocusTimer from './components/FocusTimer.jsx'
+import { motion, AnimatePresence } from 'framer-motion'
 import './App.css'
 
 function App() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [showSettings, setShowSettings] = useState(false)
   const [cityCoords, setCityCoords] = useState(null)
+  const [githubUsername, setGithubUsername] = useState(localStorage.getItem('github-username') || 'kurokodairu')
 
   const defaultLayout = [
   { id: 'weather', column: 'left', order: 1, visible: true },
   { id: 'twitch', column: 'left', order: 2, visible: true },
-  { id: 'crypto', column: 'right', order: 1, visible: true }
+  { id: 'crypto', column: 'right', order: 1, visible: true },
+  { id: 'github', column: 'right', order: 2, visible: true }
   ]
+
+  const [showFocusTimer, setShowFocusTimer] = useState(() => {
+    const saved = localStorage.getItem('dashboard-focus-timer')
+    return saved ? JSON.parse(saved) : false})
 
   const [widgetLayout, setWidgetLayout] = useState(() => {
   const saved = localStorage.getItem('dashboard-layout')
@@ -32,6 +40,8 @@ function App() {
         return <TwitchCard />
       case 'crypto':
         return <CryptoCard />
+      case 'github':
+        return <GithubCard username={githubUsername} />
       default:
         return null
     }
@@ -40,6 +50,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem('dashboard-layout', JSON.stringify(widgetLayout))
   }, [widgetLayout])
+
+  useEffect(() => {
+    localStorage.setItem('dashboard-focus-timer', JSON.stringify(showFocusTimer))
+  }, [showFocusTimer])
 
   useEffect(() => {
     // Load saved city from localStorage on app start
@@ -66,6 +80,16 @@ function App() {
     setCityCoords(cityData)
     localStorage.setItem('dashboard-city', JSON.stringify(cityData))
     setShowSettings(false)
+  }
+
+  const handleSetGithubUsername = (username) => {
+    if (username) {
+      localStorage.setItem('github-username', username)
+      setGithubUsername(username)
+    } else {
+      localStorage.removeItem('github-username')
+      setGithubUsername('')
+    }
   }
 
 
@@ -114,6 +138,21 @@ function App() {
       </header>
 
       <SmartSearchBar />
+
+      <AnimatePresence mode="wait">
+        {showFocusTimer && (
+          <motion.div
+            key="focus-timer"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            <FocusTimer isVisible={showFocusTimer} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <main className="dashboard-columns">
         <div className="left-column">
           {widgetLayout
@@ -150,6 +189,10 @@ function App() {
         currentCity={cityCoords}
         widgetLayout={widgetLayout}
         setWidgetLayout={setWidgetLayout}
+        githubUsername={githubUsername}
+        onGithubUsernameChange={handleSetGithubUsername}
+        showFocusTimer={showFocusTimer}
+        setShowFocusTimer={setShowFocusTimer}
       />
 
 

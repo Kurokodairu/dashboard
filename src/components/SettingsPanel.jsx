@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { X, Search, MapPin, Settings, ArrowUp, ArrowDown, ArrowLeftRight } from 'lucide-react'
 
-const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayout, setWidgetLayout }) => {
+const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayout, setWidgetLayout, githubUsername, onGithubUsernameChange, showFocusTimer, setShowFocusTimer }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [tempGithubUsername, setTempGithubUsername] = useState('')
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -54,6 +55,19 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
   const handleClearCity = () => {
     localStorage.removeItem('dashboard-city')
     onCitySelect(null)
+  }
+
+  const handleSetGithubUsername = () => {
+    const username = tempGithubUsername.trim()
+    if (username) {
+      onGithubUsernameChange(username)
+      setTempGithubUsername('')
+    }
+  }
+
+  const handleClearGithubUsername = () => {
+    onGithubUsernameChange('')
+    setTempGithubUsername('')
   }
 
 
@@ -249,8 +263,61 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
                 </div>
               )}
             </div>
-          <div className="widget-settings">
-          <h3>Widgets</h3>
+          </div>
+
+          <div className="setting-section">
+            <h3>GitHub</h3>
+            {githubUsername && (
+              <div className="current-github">
+                <span>@{githubUsername}</span>
+                <button className="clear-button" onClick={handleClearGithubUsername}>
+                  Clear
+                </button>
+              </div>
+            )}
+
+            <div className="github-input-container">
+              <div className="github-input-wrapper">
+                <input
+                  type="text"
+                  className="github-input"
+                  placeholder="Enter GitHub username"
+                  value={tempGithubUsername}
+                  onChange={(e) => setTempGithubUsername(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      handleSetGithubUsername()
+                    }
+                  }}
+                />
+                <button 
+                  className="set-button"
+                  onClick={handleSetGithubUsername}
+                  disabled={!tempGithubUsername.trim()}
+                >
+                  Set
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="setting-section">
+            <h3>Focus Timer</h3>
+            <div className="focus-timer-toggle">
+              <label className="toggle-label">
+                <input
+                  type="checkbox"
+                  checked={showFocusTimer}
+                  onChange={(e) => setShowFocusTimer(e.target.checked)}
+                />
+                <span>Show Focus Timer</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="setting-section">
+            <h3>Widgets</h3>
             {widgetLayout
               
               .map(widget => (
@@ -271,7 +338,6 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
                 </div>
               ))}
           </div>
-       </div>
       </div>
       {isTwitchLoggedIn && (
       <div className="twitch-logout">
@@ -364,16 +430,6 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
           flex: 1;
           padding: 2rem;
           overflow-y: auto;
-        }
-
-        .setting-section {
-          margin-bottom: 2rem;
-        }
-
-        .setting-section h3 {
-          font-size: 1.2rem;
-          font-weight: 600;
-          margin-bottom: 0.5rem;
         }
 
         .setting-description {
@@ -562,11 +618,136 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
           color: #ffffff;
           border-color: rgba(145, 70, 255, 0.6);
         }
-
-        /* Widget controls */
-        .widget-settings {
-          margin-top: 1.5rem;
+        
+        .github-input {
+          width: 100%;
+          padding: 0.75rem 1rem;
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          color: white;
+          font-size: 1rem;
         }
+
+        .github-input::placeholder {
+          color: rgba(255, 255, 255, 0.4);
+        }
+
+        .current-github {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 1rem;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          margin-bottom: 1rem;
+          font-family: monospace;
+          font-weight: 500;
+        }
+
+        .github-input-container {
+          position: relative;
+        }
+
+        .github-input-wrapper {
+          display: flex;
+          gap: 0.5rem;
+          align-items: center;
+        }
+
+        .github-input-wrapper input {
+          flex: 1;
+        }
+
+        .set-button {
+          background: rgba(34, 197, 94, 0.2);
+          border: 1px solid rgba(34, 197, 94, 0.3);
+          color: #22c55e;
+          padding: 0.75rem 1.5rem;
+          border-radius: 12px;
+          font-size: 0.95rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          white-space: nowrap;
+        }
+
+        .set-button:hover {
+          background: rgba(34, 197, 94, 0.3);
+          border-color: rgba(34, 197, 94, 0.5);
+          color: white;
+        }
+
+        .set-button:disabled {
+          background: rgba(255, 255, 255, 0.05);
+          border-color: rgba(255, 255, 255, 0.1);
+          color: rgba(255, 255, 255, 0.3);
+          cursor: not-allowed;
+        }
+
+        .set-button:disabled:hover {
+          background: rgba(255, 255, 255, 0.05);
+          border-color: rgba(255, 255, 255, 0.1);
+          color: rgba(255, 255, 255, 0.3);
+        }
+
+        .focus-timer-toggle {
+          margin-top: 1rem;
+        }
+
+        .toggle-label {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          cursor: pointer;
+          font-size: 1rem;
+          font-weight: 500;
+          padding: 1rem;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          transition: all 0.2s ease;
+        }
+
+        .toggle-label:hover {
+          background: rgba(255, 255, 255, 0.08);
+          border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .toggle-label input[type="checkbox"] {
+          width: 18px;
+          height: 18px;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          border-radius: 4px;
+          cursor: pointer;
+          position: relative;
+          appearance: none;
+          transition: all 0.2s ease;
+        }
+
+        .toggle-label input[type="checkbox"]:checked {
+          background: rgba(59, 130, 246, 0.3);
+          border-color: rgba(59, 130, 246, 0.6);
+        }
+
+        .toggle-label input[type="checkbox"]:checked::after {
+          content: '✓';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          color: white;
+          font-size: 12px;
+          font-weight: bold;
+        }
+
+        .toggle-label input[type="checkbox"]:hover {
+          background: rgba(255, 255, 255, 0.15);
+        }
+
+
 
         .widget-control {
           display: flex;
@@ -674,13 +855,13 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
 
         /* Add some spacing between sections */
         .setting-section:not(:last-child) {
-          margin-bottom: 2.5rem;
+          margin-bottom: 1.5rem;
         }
 
         .setting-section h3 {
           font-size: 1.2rem;
           font-weight: 600;
-          margin-bottom: 1rem;
+          margin-bottom: 0.5rem;
           color: white;
         }
 
