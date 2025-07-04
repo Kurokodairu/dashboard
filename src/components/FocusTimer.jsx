@@ -35,7 +35,6 @@ const FocusTimer = ({ isVisible = true }) => {
   }, [isRunning, minutes, seconds])
 
   const handleTimerComplete = () => {
-    // Play notification sound (browser notification sound)
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification(isBreak ? 'Break time over!' : 'Focus session complete!', {
         body: isBreak ? 'Time to get back to work!' : 'Take a well-deserved break!',
@@ -44,13 +43,11 @@ const FocusTimer = ({ isVisible = true }) => {
     }
 
     if (isBreak) {
-      // Break finished, start new focus session
       setIsBreak(false)
       setMinutes(25)
       setSeconds(0)
       setInitialDuration(25 * 60)
     } else {
-      // Focus session finished
       setSessions(prev => prev + 1)
       setIsBreak(true)
       // Short break (5 min) or long break (15 min) every 4 sessions

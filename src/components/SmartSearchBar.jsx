@@ -9,7 +9,7 @@ const SEARCH_ENGINES = [
   { name: 'Perplexity', url: 'https://www.perplexity.ai/search?q=', icon: <Bot size={18} /> }
 ]
 
-const SmartSearchBar = () => {
+const SmartSearchBar = ({ onSuggestionsChange }) => {
   const [engineIndex, setEngineIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
   const inputRef = useRef(null)
@@ -33,6 +33,7 @@ const SmartSearchBar = () => {
   useEffect(() => {
     if (!inputText.trim()) {
       setSuggestions([])
+      onSuggestionsChange?.(false) // Notify that suggestions are hidden
       return
     }
 
@@ -47,7 +48,9 @@ const SmartSearchBar = () => {
           signal: controller.signal
         })
         const data = await res.json()
-        setSuggestions(data[1] || [])
+        const filteredSuggestions = (data[1] || []).filter(s => s.length > 1 && s !== 'q')
+        setSuggestions(filteredSuggestions)
+        onSuggestionsChange?.(filteredSuggestions.length > 0) // Notify about suggestions visibility
       } catch (err) {
         if (err.name !== 'AbortError') console.error(err)
       }
@@ -58,7 +61,7 @@ const SmartSearchBar = () => {
       controller.abort()
       clearTimeout(debounce)
     }
-  }, [inputText])
+  }, [inputText, onSuggestionsChange])
 
 
   const handleSubmit = (e) => {
@@ -68,6 +71,8 @@ const SmartSearchBar = () => {
 
     window.open(`${currentEngine.url}${encodeURIComponent(query)}`, '_blank')
     setInputText('')
+    setSuggestions([])
+    onSuggestionsChange?.(false) // Notify that suggestions are hidden
   }
 
   const handleKeyDown = (e) => {
@@ -108,6 +113,7 @@ const SmartSearchBar = () => {
       setInputText('')
       setSuggestions([])
       setFocusedIndex(-1)
+      onSuggestionsChange?.(false) // Notify that suggestions are hidden
     }
     
   }
@@ -156,6 +162,7 @@ const SmartSearchBar = () => {
                     setInputText('')
                     setSuggestions([])
                     setFocusedIndex(-1)
+                    onSuggestionsChange?.(false) // Notify that suggestions are hidden
                   }}
                 >
                   {s}

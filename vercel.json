@@ -11,6 +11,9 @@
     },
     "api/twitch-users.js": {
       "maxDuration": 10
+    },
+    "api/github.js": {
+      "maxDuration": 10
     }
   },
   "rewrites": [
