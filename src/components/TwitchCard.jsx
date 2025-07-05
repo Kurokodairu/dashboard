@@ -248,45 +248,51 @@ const TwitchCard = () => {
       <div className="streams-list">
         {liveChannels.slice(0, 5).map((stream) => (
           <div
-            key={stream.id}
-            className="stream-item"
-            onClick={() => {
-              window.open(`https://twitch.tv/${stream.user_login || stream.user_name}`, '_blank', 'noopener,noreferrer')
-            }}
-            style={{ cursor: 'pointer' }}
-          >
-            <div className="stream-thumbnail">
-              <img 
-                src={stream.thumbnail_url.replace('{width}', '320').replace('{height}', '180')}
-                alt={`${stream.user_name} thumbnail`}
-                onError={(e) => {
-                  e.target.style.display = 'none'
-                }}
-              />
-            </div>
-            
-            <div className="stream-info">
-              <div className="stream-header">
-                <div className="streamer-info">
-                  {stream.user?.profile_image_url && (
-                    <img 
-                      src={stream.user.profile_image_url}
-                      alt={`${stream.user_name} avatar`}
-                      className="avatar"
-                    />
-                  )}
-                  <span className="streamer-name">{stream.user_name}</span>
-                </div>
-                <div className="viewer-count">
-                  <Eye size={14} />
-                  {formatViewerCount(stream.viewer_count)}
-                </div>
-              </div>
+  key={stream.id}
+  className="stream-item"
+  onClick={() => {
+    window.open(`https://twitch.tv/${stream.user_login || stream.user_name}`, '_blank', 'noopener,noreferrer')
+  }}
+  style={{ cursor: 'pointer' }}
+>
+  {/* Viewer Badge */}
+  <span
+    className="viewer-badge"
+    title={`${stream.viewer_count} viewers`}
+  >
+    <Eye size={14} />
+    {formatViewerCount(stream.viewer_count)}
+  </span>
 
-              <div className="stream-title">{stream.title}</div>
-              <div className="stream-game">{stream.game_name}</div>
-            </div>
-          </div>
+  <div className="stream-thumbnail">
+    <img 
+      src={stream.thumbnail_url.replace('{width}', '320').replace('{height}', '180')}
+      alt={`${stream.user_name} thumbnail`}
+      onError={(e) => {
+        e.target.style.display = 'none'
+      }}
+    />
+  </div>
+
+  <div className="stream-info">
+    <div className="stream-header">
+      <div className="streamer-info">
+        {stream.user?.profile_image_url && (
+          <img 
+            src={stream.user.profile_image_url}
+            alt={`${stream.user_name} avatar`}
+            className="avatar"
+          />
+        )}
+        <span className="streamer-name">{stream.user_name}</span>
+      </div>
+    </div>
+
+    <div className="stream-title" title={stream.title}>{stream.title}</div>
+    <div className="stream-game">{stream.game_name}</div>
+  </div>
+</div>
+
         ))}
       </div>
 
@@ -338,6 +344,7 @@ const TwitchCard = () => {
           border: 1px solid rgba(255, 255, 255, 0.1);
           transition: all 0.2s ease;
           cursor: pointer;
+          position: relative;
         }
 
         .stream-item:hover {
@@ -378,6 +385,7 @@ const TwitchCard = () => {
           display: flex;
           align-items: center;
           gap: 0.5rem;
+          justify-self: flex-start;
         }
 
         .avatar {
@@ -391,23 +399,29 @@ const TwitchCard = () => {
           font-size: 0.9rem;
         }
 
-        .viewer-count {
-          display: flex;
+        .viewer-badge {
+          position: absolute;
+          top: 0.5rem;
+          right: 0.5rem;
+          display: inline-flex;
           align-items: center;
-          gap: 0.25rem;
-          font-size: 0.8rem;
-          opacity: 0.8;
+          gap: 0.3rem;
+          padding: 0.0rem 0.6rem;
+          font-size: 0.75rem;
+          color: #fff;
+          border-radius: 999px;
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          z-index: 1;
         }
 
         .stream-title {
-          font-size: 0.9rem;
-          font-weight: 500;
-          margin-bottom: 0.25rem;
+          max-width: 100%;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          max-width: 80vw;
         }
+
 
         .stream-game {
           font-size: 0.8rem;
