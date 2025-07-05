@@ -18,7 +18,6 @@ const TwitchCard = () => {
       return 
     }
 
-    // If credentials exist, proceed with the fetch.
     setIsConfigured(true)
     setLoading(true)
     setError(null)
@@ -54,7 +53,6 @@ const TwitchCard = () => {
         throw new Error('Invalid response format')
       }
 
-      // Get user info for each stream
       const userIds = data.data.map(stream => stream.user_id)
       if (userIds.length > 0) {
         const usersUrl = import.meta.env.PROD 
@@ -74,8 +72,6 @@ const TwitchCard = () => {
           usersData.data.forEach(user => {
             usersMap[user.id] = user
           })
-
-          // Combine stream and user data
           const enrichedStreams = data.data.map(stream => ({
             ...stream,
             user: usersMap[stream.user_id]
@@ -95,9 +91,8 @@ const TwitchCard = () => {
     } finally {
       setLoading(false)
     }
-  }, []) // This useCallback has no dependencies as it reads from localStorage and env vars directly.
+  }, [])
 
-  // Use the single hook to manage all refresh logic
   useAutoRefresh(fetchLiveChannels)
 
   const formatViewerCount = (count) => {
@@ -128,7 +123,6 @@ const TwitchCard = () => {
   }
 
 
-  // Effect for handling logout events
   useEffect(() => {
     const handleLogout = () => {
       localStorage.removeItem('twitch-access-token')
@@ -140,7 +134,6 @@ const TwitchCard = () => {
     return () => window.removeEventListener('twitch-logout', handleLogout)
   }, [])
 
-  // Effect for handling login events
   useEffect(() => {
     const handleLogin = () => {
       setIsConfigured(true)
@@ -151,8 +144,6 @@ const TwitchCard = () => {
     return () => window.removeEventListener('twitch-login', handleLogin)
   }, [fetchLiveChannels])
 
-
-  // Effect for handling the OAuth callback from Twitch
   useEffect(() => {
     const hash = window.location.hash
     if (hash.includes('access_token')) {
@@ -162,12 +153,11 @@ const TwitchCard = () => {
       if (accessToken) {
         localStorage.setItem('twitch-access-token', accessToken)
         window.history.replaceState({}, document.title, window.location.pathname)
-        window.dispatchEvent(new Event('twitch-login')) // Dispatch event to trigger login logic
+        window.dispatchEvent(new Event('twitch-login'))
       }
     }
   }, [])
 
-  // --- Render Logic ---
 
   if (!isConfigured) {
     return (
