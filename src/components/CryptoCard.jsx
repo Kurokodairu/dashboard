@@ -12,10 +12,7 @@ const CryptoCard = () => {
         setLoading(true)
         setError(null)
         
-        // Use Vercel function in production, proxy in development
-        const apiUrl = import.meta.env.PROD 
-          ? '/api/crypto?ids=bitcoin,ethereum,monero,ripple&vs_currencies=usd&include_24hr_change=true'
-          : '/coingecko/api/v3/simple/price?ids=bitcoin,ethereum,monero,ripple&vs_currencies=usd&include_24hr_change=true'
+        const apiUrl = `/api/crypto?ids=bitcoin,ethereum,monero,ripple&vs_currencies=usd&include_24hr_change=true`
 
         const response = await fetch(apiUrl, {
           method: 'GET',

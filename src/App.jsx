@@ -7,6 +7,7 @@ import SettingsPanel from './components/SettingsPanel.jsx'
 import SmartSearchBar from './components/SmartSearchBar.jsx'
 import GithubCard from './components/GithubCard.jsx'
 import VGCard from './components/VGCard.jsx'
+import LinuxCommandCard from './components/LinuxCommand.jsx'
 import FocusTimer from './components/FocusTimer.jsx'
 import { motion, AnimatePresence } from 'framer-motion'
 import './App.css'
@@ -25,7 +26,8 @@ function App() {
   { id: 'twitch', column: 'left', order: 2, visible: true },
   { id: 'crypto', column: 'right', order: 1, visible: true },
   { id: 'vg', column: 'right', order: 2, visible: true },
-  { id: 'github', column: 'right', order: 3, visible: true }
+  { id: 'github', column: 'right', order: 3, visible: true },
+  { id: 'command', column: 'left', order: 3, visible: true }
   ]
 
   const [widgetLayout, setWidgetLayout] = useState(() => {
@@ -45,6 +47,8 @@ function App() {
         return <GithubCard username={githubUsername} />
       case 'vg':
         return <VGCard />
+      case 'command':
+        return <LinuxCommandCard />
       default:
         return null
     }
