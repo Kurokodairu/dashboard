@@ -120,12 +120,19 @@ const VGCard = () => {
           padding: 1rem;
           border-radius: 8px;
           border: 1px solid rgba(255, 255, 255, 0.1);
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          text-align: left;
         }
 
         .news-link {
           font-weight: 600;
           color: white;
           text-decoration: none;
+          display: block;
+          width: 100%;
+          line-height: 1.4;
         }
 
         .news-link:hover {
@@ -136,6 +143,9 @@ const VGCard = () => {
           font-size: 0.9rem;
           margin-top: 0.5rem;
           opacity: 0.85;
+          line-height: 1.5;
+          width: 100%;
+          text-align: left;
         }
 
         .timestamp {

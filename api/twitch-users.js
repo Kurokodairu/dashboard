@@ -18,6 +18,7 @@ export default async function handler(req, res) {
 
   try {
     const { ids } = req.query;
+    // Get credentials from request headers (sent by client after user authentication)
     const authorization = req.headers.authorization;
     const clientId = req.headers['client-id'];
 
@@ -34,7 +35,7 @@ export default async function handler(req, res) {
     // Convert comma-separated IDs to query parameters
     const idParams = ids.split(',').map(id => `id=${id}`).join('&');
 
-    // Make request to Twitch API
+    // Make request to Twitch API using user's access token
     const twitchResponse = await fetch(
       `https://api.twitch.tv/helix/users?${idParams}`,
       {
@@ -57,7 +58,7 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Twitch Users API error:', error);
     res.status(500).json({ 
-      error: 'Failed to fetch Twitch users data',
+      error: 'Failed to fetch Twitch user data',
       message: error.message 
     });
   }

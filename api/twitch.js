@@ -17,6 +17,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Get credentials from request headers (sent by client after user authentication)
     const authorization = req.headers.authorization;
     const clientId = req.headers['client-id'];
 
@@ -25,7 +26,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    // Make request to Twitch API
+    // Make request to Twitch API using user's access token
     const twitchResponse = await fetch(
       'https://api.twitch.tv/helix/streams/followed?user_id=237308507',
       {

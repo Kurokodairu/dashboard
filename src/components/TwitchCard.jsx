@@ -15,7 +15,7 @@ const TwitchCard = () => {
     if (!clientId || !accessToken) {
       setIsConfigured(false)
       setLoading(false)
-      return 
+      return
     }
 
     setIsConfigured(true)
@@ -24,9 +24,9 @@ const TwitchCard = () => {
 
     try {
       // Use Vercel function in production, direct API in development
-      const apiUrl = import.meta.env.PROD 
+      const apiUrl = import.meta.env.PROD
         ? '/api/twitch'
-        : '/twitch/helix/streams/followed?user_id=237308507'
+        : 'https://api.twitch.tv/helix/streams/followed?user_id=237308507'
 
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -48,16 +48,16 @@ const TwitchCard = () => {
       }
 
       const data = await response.json()
-      
+
       if (!data.data) {
         throw new Error('Invalid response format')
       }
 
       const userIds = data.data.map(stream => stream.user_id)
       if (userIds.length > 0) {
-        const usersUrl = import.meta.env.PROD 
+        const usersUrl = import.meta.env.PROD
           ? `/api/twitch-users?ids=${userIds.join(',')}`
-          : `/twitch/helix/users?id=${userIds.join('&id=')}`
+          : `https://api.twitch.tv/helix/users?id=${userIds.join('&id=')}`
 
         const usersResponse = await fetch(usersUrl, {
           headers: {
@@ -110,18 +110,17 @@ const TwitchCard = () => {
     }
 
     const redirectUri = import.meta.env.VITE_TWITCH_REDIRECT_URI ||
-      `${window.location.origin}${window.location.pathname}auth/callback`
+      `${window.location.origin}/auth/callback`
     const scopes = 'user:read:follows'
-    
+
     const authUrl = `https://id.twitch.tv/oauth2/authorize?` +
       `client_id=${clientId}&` +
       `redirect_uri=${encodeURIComponent(redirectUri)}&` +
       `response_type=token&` +
       `scope=${encodeURIComponent(scopes)}`
-    
+
     window.location.href = authUrl
   }
-
 
   useEffect(() => {
     const handleLogout = () => {
@@ -149,7 +148,7 @@ const TwitchCard = () => {
     if (hash.includes('access_token')) {
       const params = new URLSearchParams(hash.substring(1))
       const accessToken = params.get('access_token')
-      
+
       if (accessToken) {
         localStorage.setItem('twitch-access-token', accessToken)
         window.history.replaceState({}, document.title, window.location.pathname)
@@ -157,7 +156,6 @@ const TwitchCard = () => {
       }
     }
   }, [])
-
 
   if (!isConfigured) {
     return (
@@ -172,7 +170,7 @@ const TwitchCard = () => {
           </button>
           <div className="setup-instructions">
             <p className="text-sm mt-2">
-              <strong>Current redirect URI:</strong> {import.meta.env.VITE_TWITCH_REDIRECT_URI || 'Not Set'}
+              <strong>Current redirect URI:</strong> {import.meta.env.VITE_TWITCH_REDIRECT_URI || `${window.location.origin}/auth/callback`}
             </p>
           </div>
         </div>
@@ -234,7 +232,7 @@ const TwitchCard = () => {
         <Tv size={24} />
         Live Channels <p style={{ color: '#f87171' }}>({liveChannels.length})</p>
       </h2>
-      
+
       <div className="streams-list">
         {liveChannels.slice(0, 5).map((stream) => (
           <div
@@ -255,7 +253,7 @@ const TwitchCard = () => {
   </span>
 
   <div className="stream-thumbnail">
-    <img 
+    <img
       src={stream.thumbnail_url.replace('{width}', '320').replace('{height}', '180')}
       alt={`${stream.user_name} thumbnail`}
       onError={(e) => {
@@ -268,7 +266,7 @@ const TwitchCard = () => {
     <div className="stream-header">
       <div className="streamer-info">
         {stream.user?.profile_image_url && (
-          <img 
+          <img
             src={stream.user.profile_image_url}
             alt={`${stream.user_name} avatar`}
             className="avatar"

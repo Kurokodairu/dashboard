@@ -14,6 +14,9 @@
     },
     "api/github.js": {
       "maxDuration": 10
+    },
+    "api/vg-summary.js": {
+      "maxDuration": 30
     }
   },
   "rewrites": [

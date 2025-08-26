@@ -10,6 +10,12 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600')
 
+  // Validate OpenAI API key
+  if (!process.env.OPENAI_API_KEY) {
+    console.error('OPENAI_API_KEY environment variable is not set')
+    return res.status(500).json({ error: 'OpenAI API key not configured' })
+  }
+
   // Use cache if valid
   if (lastSummarized && Date.now() - lastSummarized < TTL && summaryCache.size > 0) {
     return res.status(200).json({
@@ -77,40 +83,47 @@ export default async function handler(req, res) {
 }
 
 async function summarizeWithOpenAI(articles) {
-  const headlines = articles.map(a => `- ${a.title}`).join('\n')
+  const summaries = []
 
-  const prompt = `You are a helpful Norwegian news summarizer. Given today's VG.no headlines, write 3-4 concise bullet points summarizing the main stories. Do not type the headline in the description, use new information only. Use as few words as possible. Add more background context if it's ongoing or political.`
+  for (const article of articles) {
+    const prompt = `You are a helpful Norwegian news summarizer, give the summary in Norwegian. Given this VG.no headline and description, write a concise 1-2 sentence summary. Do not repeat the headline, provide additional context or background information. Use as few words as possible while being informative.`
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.VITE_OPENAI_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'gpt-4.1-mini',
-      messages: [
-        { role: 'system', content: 'You summarize Norwegian news for a dashboard.' },
-        { role: 'user', content: `${prompt}\n\nHeadlines:\n${headlines}` }
-      ],
-      temperature: 0.5,
-      max_tokens: 1000
-    })
-  })
+    const content = `Headline: ${article.title}\nDescription: ${article.description || 'No description available'}`
 
-  if (!response.ok) {
-    const text = await response.text()
-    console.error('OpenAI response text:', text)
-    throw new Error(`OpenAI error: ${response.statusText}`)
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: 'You summarize Norwegian news articles concisely.' },
+            { role: 'user', content: `${prompt}\n\n${content}` }
+          ],
+          temperature: 0.3,
+          max_tokens: 150
+        })
+      })
+
+      if (!response.ok) {
+        const text = await response.text()
+        console.error('OpenAI response text:', text)
+        summaries.push('Summary not available')
+        continue
+      }
+
+      const data = await response.json()
+      const summary = data.choices?.[0]?.message?.content?.trim() || 'Summary not available'
+      summaries.push(summary)
+
+    } catch (error) {
+      console.error('Error summarizing article:', article.title, error)
+      summaries.push('Summary not available')
+    }
   }
 
-  const data = await response.json()
-  const content = data.choices?.[0]?.message?.content || ''
-
-  const bullets = content
-    .split(/\n+/)
-    .filter(line => line.startsWith('-') || line.startsWith('•'))
-
-  // Fallback: reuse if too few bullets
-  return articles.map((_, i) => bullets[i] || bullets[i % bullets.length] || '...')
+  return summaries
 }
