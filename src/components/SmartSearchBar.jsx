@@ -37,9 +37,9 @@ const SmartSearchBar = ({ onSuggestionsChange }) => {
       return
     }
 
-    const apiUrl = import.meta.env.PROD 
-          ? `/api/suggest${encodeURIComponent(inputText)}`
-          : `/suggest${encodeURIComponent(inputText)}`
+  const apiUrl = import.meta.env.PROD 
+      ? `/api/suggest?q=${encodeURIComponent(inputText)}`
+      : `/suggest?q=${encodeURIComponent(inputText)}`
 
     const controller = new AbortController()
     const fetchSuggestions = async () => {
@@ -48,7 +48,10 @@ const SmartSearchBar = ({ onSuggestionsChange }) => {
           signal: controller.signal
         })
         const data = await res.json()
-        const filteredSuggestions = (data[1] || []).filter(s => s.length > 1 && s !== 'q')
+        const list = Array.isArray(data)
+          ? data[1]
+          : (Array.isArray(data?.suggestions) ? data.suggestions : [])
+        const filteredSuggestions = (list || []).filter(s => s.length > 1 && s !== 'q')
         setSuggestions(filteredSuggestions)
         onSuggestionsChange?.(filteredSuggestions.length > 0) // Notify about suggestions visibility
       } catch (err) {

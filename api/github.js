@@ -11,21 +11,30 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const { username } = req.query
+  const { username, repos } = req.query
 
   if (!username) {
     return res.status(400).json({ error: 'Missing GitHub username' })
   }
 
   try {
+    if (repos) {
+      const response = await fetch(`https://api.github.com/users/${username}/repos?sort=stars&per_page=3`)
+      if (!response.ok) {
+        throw new Error(`GitHub API error: ${response.status}`)
+      }
+      const data = await response.json()
+      return res.status(200).json(data)
+    }
+
     const response = await fetch(`https://api.github.com/users/${username}`)
 
     if (!response.ok) {
       throw new Error(`GitHub API error: ${response.status}`)
     }
 
-    const data = await response.json()
-    res.status(200).json(data)
+  const data = await response.json()
+  res.status(200).json(data)
   } catch (error) {
     console.error('GitHub API error:', error)
     res.status(500).json({ error: 'Failed to fetch GitHub profile' })
