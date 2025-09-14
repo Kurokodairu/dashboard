@@ -12,6 +12,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Show workspace layout (debug)
+        run: |
+          echo "Workspace root:" && pwd
+          echo "Tree:" && ls -la
+          echo "dashboard/ contents:" && ls -la dashboard || true
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
@@ -24,7 +30,7 @@ jobs:
       - name: Build and push Dashboard image
         uses: docker/build-push-action@v4
         with:
-          context: ./dashboard
-          file: ./dashboard/dockerfile
+          context: .
+          file: ./dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/dashboard:latest
