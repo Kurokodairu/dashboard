@@ -37,9 +37,7 @@ const SmartSearchBar = ({ onSuggestionsChange }) => {
       return
     }
 
-  const apiUrl = import.meta.env.PROD 
-      ? `/api/suggest?q=${encodeURIComponent(inputText)}`
-      : `/suggest?q=${encodeURIComponent(inputText)}`
+  const apiUrl = `/api/suggest?q=${encodeURIComponent(inputText)}`
 
     const controller = new AbortController()
     const fetchSuggestions = async () => {

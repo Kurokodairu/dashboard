@@ -32,9 +32,7 @@ const WeatherCard = ({ cityCoords }) => {
 
       try {
         const { latitude, longitude } = cityCoords
-        const apiUrl = import.meta.env.PROD
-          ? `/api/weather?lat=${latitude}&lon=${longitude}`
-          : `/weather?lat=${latitude}&lon=${longitude}`
+        const apiUrl = `/api/weather?lat=${latitude}&lon=${longitude}`
 
         const response = await fetch(apiUrl)
         if (!response.ok) throw new Error('Weather data unavailable')

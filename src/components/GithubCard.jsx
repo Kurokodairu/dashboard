@@ -20,19 +20,13 @@ const GithubCard = ({ username }) => {
       setError(null)
 
       try {
-        const baseUrl = import.meta.env.PROD
-          ? `/api/github?username=${username}`
-          : `/github/${username}`
+        const baseUrl = `/api/github?username=${username}`
 
         const profileRes = await fetch(baseUrl)
         if (!profileRes.ok) throw new Error('User not found')
         const profileData = await profileRes.json()
 
-        const reposRes = await fetch(
-          import.meta.env.PROD
-            ? `/api/github?username=${username}&repos=true`
-            : `${baseUrl}/repos?sort=stars&per_page=3`
-        )
+        const reposRes = await fetch(`${baseUrl}/repos?sort=stars&per_page=3`)
         const reposData = await reposRes.json()
 
         setProfile(profileData)

@@ -9,7 +9,7 @@ const TwitchCard = () => {
   const [isConfigured, setIsConfigured] = useState(false)
 
   const fetchLiveChannels = useCallback(async () => {
-    // Prefer build-time env if present, else fetch runtime config
+    // Prefer build-time env if present, else fetch runtime config, Weird but ok for dev and prod switching
     let clientId = import.meta.env.VITE_TWITCH_CLIENT_ID
     if (!clientId && import.meta.env.PROD) {
       try {
@@ -36,9 +36,7 @@ const TwitchCard = () => {
 
     try {
       // Use Vercel function in production, direct API in development
-      const apiUrl = import.meta.env.PROD
-        ? '/api/twitch'
-        : 'https://api.twitch.tv/helix/streams/followed?user_id=237308507'
+      const apiUrl = '/api/twitch'
 
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -67,9 +65,7 @@ const TwitchCard = () => {
 
       const userIds = data.data.map(stream => stream.user_id)
       if (userIds.length > 0) {
-        const usersUrl = import.meta.env.PROD
-          ? `/api/twitch-users?ids=${userIds.join(',')}`
-          : `https://api.twitch.tv/helix/users?id=${userIds.join('&id=')}`
+        const usersUrl = `/api/twitch-users?ids=${userIds.join(',')}`
 
         const usersResponse = await fetch(usersUrl, {
           headers: {

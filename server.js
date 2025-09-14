@@ -15,7 +15,6 @@ const __dirname = path.dirname(__filename)
 const app = express()
 const port = process.env.PORT || 8080
 
-// Trust proxy if behind reverse proxy
 app.set('trust proxy', true)
 
 // Basic health endpoint
@@ -44,6 +43,7 @@ apiRouter.get('/config', (req, res) => {
   })
 })
 
+
 apiRouter.get('/weather', async (req, res) => (await loadHandler('./api/weather.js'))(req, res))
 apiRouter.get('/crypto', async (req, res) => (await loadHandler('./api/crypto.js'))(req, res))
 apiRouter.get('/github', async (req, res) => (await loadHandler('./api/github.js'))(req, res))
@@ -53,7 +53,6 @@ apiRouter.get('/vg-summary', async (req, res) => (await loadHandler('./api/vg-su
 apiRouter.get('/suggest', async (req, res) => (await loadHandler('./api/suggest.js'))(req, res))
 apiRouter.get('/command', async (req, res) => (await loadHandler('./api/command.js'))(req, res))
 
-// Preflight for all /api routes
 apiRouter.options('*', (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
