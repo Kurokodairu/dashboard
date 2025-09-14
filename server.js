@@ -31,6 +31,19 @@ app.use(express.static(distDir))
 // API routes wired to existing handlers
 const apiRouter = express.Router()
 
+// Public runtime config for the client (safe values only)
+apiRouter.get('/config', (req, res) => {
+  const twitchClientId = process.env.VITE_TWITCH_CLIENT_ID || process.env.TWITCH_CLIENT_ID || ''
+  const twitchRedirectUri = process.env.VITE_TWITCH_REDIRECT_URI || process.env.TWITCH_REDIRECT_URI || ''
+
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Cache-Control', 'public, max-age=300')
+  return res.status(200).json({
+    twitchClientId,
+    twitchRedirectUri
+  })
+})
+
 apiRouter.get('/weather', async (req, res) => (await loadHandler('./api/weather.js'))(req, res))
 apiRouter.get('/crypto', async (req, res) => (await loadHandler('./api/crypto.js'))(req, res))
 apiRouter.get('/github', async (req, res) => (await loadHandler('./api/github.js'))(req, res))

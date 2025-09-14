@@ -9,7 +9,19 @@ const TwitchCard = () => {
   const [isConfigured, setIsConfigured] = useState(false)
 
   const fetchLiveChannels = useCallback(async () => {
-    const clientId = import.meta.env.VITE_TWITCH_CLIENT_ID
+    // Prefer build-time env if present, else fetch runtime config
+    let clientId = import.meta.env.VITE_TWITCH_CLIENT_ID
+    if (!clientId && import.meta.env.PROD) {
+      try {
+        const cfgRes = await fetch('/api/config')
+        if (cfgRes.ok) {
+          const cfg = await cfgRes.json()
+          clientId = cfg.twitchClientId || ''
+        }
+      } catch (e) {
+        // ignore, will handle as not configured below
+      }
+    }
     const accessToken = localStorage.getItem('twitch-access-token')
 
     if (!clientId || !accessToken) {
@@ -102,15 +114,24 @@ const TwitchCard = () => {
     return count.toString()
   }
 
-  const handleTwitchAuth = () => {
-    const clientId = import.meta.env.VITE_TWITCH_CLIENT_ID
+  const handleTwitchAuth = async () => {
+    let clientId = import.meta.env.VITE_TWITCH_CLIENT_ID
+    let redirectUri = import.meta.env.VITE_TWITCH_REDIRECT_URI || `${window.location.origin}/auth/callback`
+    if (!clientId && import.meta.env.PROD) {
+      try {
+        const cfgRes = await fetch('/api/config')
+        if (cfgRes.ok) {
+          const cfg = await cfgRes.json()
+          clientId = cfg.twitchClientId || clientId
+          redirectUri = cfg.twitchRedirectUri || redirectUri
+        }
+      } catch (e) {}
+    }
     if (!clientId) {
       alert('Please add your Twitch Client ID to the environment variables')
       return
     }
-
-    const redirectUri = import.meta.env.VITE_TWITCH_REDIRECT_URI ||
-      `${window.location.origin}/auth/callback`
+    
     const scopes = 'user:read:follows'
 
     const authUrl = `https://id.twitch.tv/oauth2/authorize?` +

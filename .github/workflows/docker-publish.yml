@@ -28,6 +28,3 @@ jobs:
           file: ./dashboard/dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/dashboard:latest
-          build-args: |
-            VITE_TWITCH_CLIENT_ID=${{ secrets.VITE_TWITCH_CLIENT_ID }}
-            VITE_TWITCH_REDIRECT_URI=${{ vars.VITE_TWITCH_REDIRECT_URI }}
