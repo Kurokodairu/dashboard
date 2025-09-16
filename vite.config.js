@@ -6,7 +6,7 @@ export default defineConfig({
   base: '/',
   plugins: [react()],
   server: {
-    allowedHosts: ['test.kurokodairu.com'],
+    allowedHosts: ['docker'],
     proxy: {
       '/weather': {
         target: 'https://api.met.no',
