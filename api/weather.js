@@ -27,7 +27,7 @@ export default async function handler(req, res) {
 
     // Make request to yr.no API
     const weatherResponse = await fetch(
-      `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${lat}&lon=${lon}`,
+      `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`,
       {
         headers: {
           'User-Agent': 'Dashboard App (kurokodairuwu@proton.me)'
