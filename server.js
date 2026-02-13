@@ -2,12 +2,14 @@ import express from 'express'
 import path from 'path'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
-
-// Helper to import default-exported handlers as functions
-async function loadHandler(modulePath) {
-  const mod = await import(modulePath)
-  return mod.default || mod
-}
+import weatherHandler from './api/weather.js'
+import cryptoHandler from './api/crypto.js'
+import githubHandler from './api/github.js'
+import twitchHandler from './api/twitch.js'
+import twitchUsersHandler from './api/twitch-users.js'
+import vgSummaryHandler from './api/vg-summary.js'
+import suggestHandler from './api/suggest.js'
+import commandHandler from './api/command.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -44,14 +46,14 @@ apiRouter.get('/config', (req, res) => {
 })
 
 
-apiRouter.get('/weather', async (req, res) => (await loadHandler('./api/weather.js'))(req, res))
-apiRouter.get('/crypto', async (req, res) => (await loadHandler('./api/crypto.js'))(req, res))
-apiRouter.get('/github', async (req, res) => (await loadHandler('./api/github.js'))(req, res))
-apiRouter.get('/twitch', async (req, res) => (await loadHandler('./api/twitch.js'))(req, res))
-apiRouter.get('/twitch-users', async (req, res) => (await loadHandler('./api/twitch-users.js'))(req, res))
-apiRouter.get('/vg-summary', async (req, res) => (await loadHandler('./api/vg-summary.js'))(req, res))
-apiRouter.get('/suggest', async (req, res) => (await loadHandler('./api/suggest.js'))(req, res))
-apiRouter.get('/command', async (req, res) => (await loadHandler('./api/command.js'))(req, res))
+apiRouter.get('/weather', weatherHandler)
+apiRouter.get('/crypto', cryptoHandler)
+apiRouter.get('/github', githubHandler)
+apiRouter.get('/twitch', twitchHandler)
+apiRouter.get('/twitch-users', twitchUsersHandler)
+apiRouter.get('/vg-summary', vgSummaryHandler)
+apiRouter.get('/suggest', suggestHandler)
+apiRouter.get('/command', commandHandler)
 
 apiRouter.options('*', (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*')
