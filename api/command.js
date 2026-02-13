@@ -32,11 +32,23 @@ if (cheatsPath) {
 }
 
 export default async function handler(req, res) {
-    const now = Date.now()
-    if (!cached || now - lastFetch > TTL) {
-        cached = commands[Math.floor(Math.random() * commands.length)]
-        lastFetch = now
-    }
+    try {
+        if (!commands || commands.length === 0) {
+            return res.status(200).json({
+                command: 'No commands available',
+                description: 'Command database could not be loaded'
+            })
+        }
 
-    res.status(200).json(cached)
+        const now = Date.now()
+        if (!cached || now - lastFetch > TTL) {
+            cached = commands[Math.floor(Math.random() * commands.length)]
+            lastFetch = now
+        }
+
+        res.status(200).json(cached || { command: 'echo', description: 'No command available' })
+    } catch (error) {
+        console.error('Command handler error:', error)
+        res.status(500).json({ error: 'Failed to fetch command' })
+    }
 }

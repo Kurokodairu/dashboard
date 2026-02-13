@@ -20,15 +20,21 @@ export default async function handler(req, res) {
     // Get credentials from request headers (sent by client after user authentication)
     const authorization = req.headers.authorization;
     const clientId = req.headers['client-id'];
+    const userId = req.query.user_id;
 
     if (!authorization || !clientId) {
       res.status(401).json({ error: 'Missing authorization headers' });
       return;
     }
 
+    if (!userId) {
+      res.status(400).json({ error: 'Missing required parameter: user_id' });
+      return;
+    }
+
     // Make request to Twitch API using user's access token
     const twitchResponse = await fetch(
-      'https://api.twitch.tv/helix/streams/followed?user_id=237308507',
+      `https://api.twitch.tv/helix/streams/followed?user_id=${encodeURIComponent(userId)}`,
       {
         headers: {
           'Authorization': authorization,

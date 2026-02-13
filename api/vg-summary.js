@@ -10,10 +10,22 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600')
 
-  // Validate OpenAI API key
+  // Return cached data if available (graceful fallback when no API key)
   if (!process.env.OPENAI_API_KEY) {
-    console.error('OPENAI_API_KEY environment variable is not set')
-    return res.status(500).json({ error: 'OpenAI API key not configured' })
+    console.warn('OPENAI_API_KEY not configured, returning cached data')
+    if (summaryCache.size > 0) {
+      return res.status(200).json({
+        source: 'cache',
+        cached: true,
+        summaries: Array.from(summaryCache.values())
+      })
+    }
+    // No cached data and no API key
+    return res.status(200).json({
+      source: 'none',
+      summaries: [],
+      message: 'VG API not configured'
+    })
   }
 
   // Use cache if valid
@@ -25,7 +37,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const feedRes = await fetch(VG_RSS_URL)
+    const feedRes = await fetch(VG_RSS_URL, {
+      headers: { 'User-Agent': 'DashboardApp/1.0' }
+    })
     const xml = await feedRes.text()
     const json = await parseStringPromise(xml)
 

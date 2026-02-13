@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
+import useAutoRefresh from '../hooks/AutoRefresh.js'
 
 const CryptoCard = () => {
   const [cryptoData, setCryptoData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    const fetchCryptoData = async () => {
+  const fetchCryptoData = useCallback(async () => {
       try {
         setLoading(true)
         setError(null)
@@ -72,11 +72,9 @@ const CryptoCard = () => {
       } finally {
         setLoading(false)
       }
-    }
+    }, [])
 
-    // Only fetch once when component mounts
-    fetchCryptoData()
-  }, [])
+    useAutoRefresh(fetchCryptoData)
 
   const formatPrice = (price) => {
     if (price >= 1) {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Tv, Users, Eye } from 'lucide-react'
+import { Tv, Eye } from 'lucide-react'
 import useAutoRefresh from '../hooks/AutoRefresh.js'
 
 const TwitchCard = () => {
@@ -18,14 +18,43 @@ const TwitchCard = () => {
           const cfg = await cfgRes.json()
           clientId = cfg.twitchClientId || ''
         }
-      } catch (e) {
+      } catch {
         // ignore, will handle as not configured below
       }
     }
     const accessToken = localStorage.getItem('twitch-access-token')
+    let userId = localStorage.getItem('twitch-user-id')
 
     if (!clientId || !accessToken) {
       setIsConfigured(false)
+      setLoading(false)
+      return
+    }
+
+    // If we don't have a user ID, fetch it first
+    if (!userId) {
+      try {
+        const userResponse = await fetch('https://api.twitch.tv/helix/users', {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Client-Id': clientId,
+          }
+        })
+
+        if (userResponse.ok) {
+          const userData = await userResponse.json()
+          if (userData.data && userData.data[0]) {
+            userId = userData.data[0].id
+            localStorage.setItem('twitch-user-id', userId)
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch user ID:', err)
+      }
+    }
+
+    if (!userId) {
+      setError('Unable to fetch user information')
       setLoading(false)
       return
     }
@@ -36,7 +65,7 @@ const TwitchCard = () => {
 
     try {
       // Use Vercel function in production, direct API in development
-      const apiUrl = '/api/twitch'
+      const apiUrl = `/api/twitch?user_id=${encodeURIComponent(userId)}`
 
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -52,6 +81,7 @@ const TwitchCard = () => {
         if (response.status === 401) {
           // Token expired, clear it
           localStorage.removeItem('twitch-access-token')
+          localStorage.removeItem('twitch-user-id')
           throw new Error('Authentication expired. Please reconnect to Twitch.')
         }
         throw new Error(`HTTP ${response.status}: Unable to fetch live channels`)
@@ -121,7 +151,9 @@ const TwitchCard = () => {
           clientId = cfg.twitchClientId || clientId
           redirectUri = cfg.twitchRedirectUri || redirectUri
         }
-      } catch (e) {}
+      } catch {
+        // ignore and keep fallback redirect URI
+      }
     }
     if (!clientId) {
       alert('Please add your Twitch Client ID to the environment variables')
@@ -142,6 +174,7 @@ const TwitchCard = () => {
   useEffect(() => {
     const handleLogout = () => {
       localStorage.removeItem('twitch-access-token')
+      localStorage.removeItem('twitch-user-id')
       setLiveChannels([])
       setIsConfigured(false)
     }
@@ -247,56 +280,54 @@ const TwitchCard = () => {
     <div className="glass-card">
       <h2 className="card-title">
         <Tv size={24} />
-        Live Channels <p style={{ color: '#f87171' }}>({liveChannels.length})</p>
+        Live Channels <span className="live-count">({liveChannels.length})</span>
       </h2>
 
       <div className="streams-list">
         {liveChannels.slice(0, 5).map((stream) => (
           <div
-  key={stream.id}
-  className="stream-item"
-  onClick={() => {
-    window.open(`https://twitch.tv/${stream.user_login || stream.user_name}`, '_blank', 'noopener,noreferrer')
-  }}
-  style={{ cursor: 'pointer' }}
->
-  {/* Viewer Badge */}
-  <span
-    className="viewer-badge"
-    title={`${stream.viewer_count} viewers`}
-  >
-    <Eye size={14} />
-    {formatViewerCount(stream.viewer_count)}
-  </span>
+            key={stream.id}
+            className="stream-item"
+            onClick={() => {
+              window.open(`https://twitch.tv/${stream.user_login || stream.user_name}`, '_blank', 'noopener,noreferrer')
+            }}
+          >
+            <span
+              className="viewer-badge"
+              title={`${stream.viewer_count} viewers`}
+            >
+              <Eye size={14} />
+              {formatViewerCount(stream.viewer_count)}
+            </span>
 
-  <div className="stream-thumbnail">
-    <img
-      src={stream.thumbnail_url.replace('{width}', '320').replace('{height}', '180')}
-      alt={`${stream.user_name} thumbnail`}
-      onError={(e) => {
-        e.target.style.display = 'none'
-      }}
-    />
-  </div>
+            <div className="stream-thumbnail">
+              <img
+                src={stream.thumbnail_url.replace('{width}', '320').replace('{height}', '180')}
+                alt={`${stream.user_name} thumbnail`}
+                onError={(e) => {
+                  e.target.style.display = 'none'
+                }}
+              />
+            </div>
 
-  <div className="stream-info">
-    <div className="stream-header">
-      <div className="streamer-info">
-        {stream.user?.profile_image_url && (
-          <img
-            src={stream.user.profile_image_url}
-            alt={`${stream.user_name} avatar`}
-            className="avatar"
-          />
-        )}
-        <span className="streamer-name">{stream.user_name}</span>
-      </div>
-    </div>
+            <div className="stream-info">
+              <div className="stream-header">
+                <div className="streamer-info">
+                  {stream.user?.profile_image_url && (
+                    <img
+                      src={stream.user.profile_image_url}
+                      alt={`${stream.user_name} avatar`}
+                      className="avatar"
+                    />
+                  )}
+                  <span className="streamer-name">{stream.user_name}</span>
+                </div>
+              </div>
 
-    <div className="stream-title" title={stream.title}>{stream.title}</div>
-    <div className="stream-game">{stream.game_name}</div>
-  </div>
-</div>
+              <div className="stream-title" title={stream.title}>{stream.title}</div>
+              <div className="stream-game">{stream.game_name}</div>
+            </div>
+          </div>
 
         ))}
       </div>
@@ -306,178 +337,6 @@ const TwitchCard = () => {
           <p>+{liveChannels.length - 5} more channels live</p>
         </div>
       )}
-
-      <style>{`
-        .twitch-setup {
-          text-align: center;
-          padding: 2rem;
-        }
-
-        .connect-button, .reconnect-button {
-          background: #9146ff;
-          border: none;
-          color: white;
-          padding: 0.75rem 1.5rem;
-          border-radius: 8px;
-          font-weight: 600;
-          cursor: pointer;
-          margin-top: 1rem;
-          transition: background-color 0.2s ease;
-        }
-
-        .connect-button:hover, .reconnect-button:hover {
-          background: #7c3aed;
-        }
-
-        .setup-instructions {
-          margin-top: 1rem;
-          opacity: 0.7;
-        }
-
-        .streams-list {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        .stream-item {
-          display: flex;
-          gap: 1rem;
-          padding: 1rem;
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          transition: all 0.2s ease;
-          cursor: pointer;
-          position: relative;
-        }
-
-        .stream-item:hover {
-          background: rgba(255, 255, 255, 0.08);
-          border-color: rgba(255, 255, 255, 0.2);
-          transform: translateY(-2px);
-        }
-
-        .stream-thumbnail {
-          position: relative;
-          flex-shrink: 0;
-          width: 128px;
-          height: 72px;
-          border-radius: 8px;
-          overflow: hidden;
-          background: rgba(255, 255, 255, 0.1);
-        }
-
-        .stream-thumbnail img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-
-        .stream-info {
-          flex: 1;
-          min-width: 0;
-        }
-
-        .stream-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 0.5rem;
-        }
-
-        .streamer-info {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          justify-self: flex-start;
-        }
-
-        .avatar {
-          width: 24px;
-          height: 24px;
-          border-radius: 50%;
-        }
-
-        .streamer-name {
-          font-weight: 600;
-          font-size: 0.9rem;
-        }
-
-        .viewer-badge {
-          position: absolute;
-          top: 0.5rem;
-          right: 0.5rem;
-          display: inline-flex;
-          align-items: center;
-          gap: 0.3rem;
-          padding: 0.0rem 0.6rem;
-          font-size: 0.75rem;
-          color: #fff;
-          border-radius: 999px;
-          backdrop-filter: blur(8px);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          z-index: 1;
-        }
-
-        .stream-title {
-          max-width: 100%;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
-
-
-        .stream-game {
-          font-size: 0.8rem;
-          opacity: 0.7;
-        }
-
-        .no-streams {
-          text-align: center;
-          padding: 2rem;
-          opacity: 0.6;
-        }
-
-        .more-streams {
-          text-align: center;
-          padding: 1rem;
-          opacity: 0.7;
-          font-size: 0.9rem;
-        }
-
-        .text-sm {
-          font-size: 0.8rem;
-        }
-
-        .mt-2 {
-          margin-top: 0.5rem;
-        }
-        
-
-        @media (max-width: 1156px) {
-          .stream-item {
-            flex-direction: column;
-            gap: 0.75rem;
-          }
-          
-          .stream-thumbnail {
-            width: 100%;
-            height: 120px;
-          }
-          
-          .stream-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.5rem;
-          }
-        }
-        @media (max-width: 640px) {
-          .stream-title {
-            max-width: 65vw;
-          }
-        }
-      `}</style>
     </div>
   )
 }

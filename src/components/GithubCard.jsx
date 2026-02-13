@@ -20,13 +20,15 @@ const GithubCard = ({ username }) => {
       setError(null)
 
       try {
-        const baseUrl = `/api/github?username=${username}`
+        const encodedUsername = encodeURIComponent(username)
+        const baseUrl = `/api/github?username=${encodedUsername}`
 
         const profileRes = await fetch(baseUrl)
         if (!profileRes.ok) throw new Error('User not found')
         const profileData = await profileRes.json()
 
-        const reposRes = await fetch(`${baseUrl}/repos?sort=stars&per_page=3`)
+        const reposRes = await fetch(`/api/github?username=${encodedUsername}&repos=true`)
+        if (!reposRes.ok) throw new Error('Failed to load repositories')
         const reposData = await reposRes.json()
 
         setProfile(profileData)

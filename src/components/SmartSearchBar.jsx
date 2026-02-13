@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from 'react'
 import { Search, Bot } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { div } from 'framer-motion/client'
 
+const Motion = motion
 
 const SEARCH_ENGINES = [
   { name: 'Google', url: 'https://www.google.com/search?q=', icon: <Search size={18} /> },
@@ -147,7 +147,7 @@ const SmartSearchBar = ({ onSuggestionsChange }) => {
         {/* SUGGESTIONS */}
         <AnimatePresence>
           {suggestions.length > 0 && (
-            <motion.ul
+            <Motion.ul
               className="suggestions-list"
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
@@ -169,13 +169,13 @@ const SmartSearchBar = ({ onSuggestionsChange }) => {
                   {s}
                 </li>
               ))}
-            </motion.ul>
+            </Motion.ul>
           )}
         </AnimatePresence>
       </div>
       </form>
 
-       <motion.div
+       <Motion.div
         className="suggestion-spacer"
         animate={{ height: suggestions.length > 0 ? 200 : 0 }}
         transition={{ duration: 0.3, ease: 'easeInOut' }}

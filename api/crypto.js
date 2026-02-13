@@ -27,7 +27,8 @@ export default async function handler(req, res) {
 
     // Make request to CoinGecko API
     const cryptoResponse = await fetch(
-      `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(ids)}&vs_currencies=${encodeURIComponent(vs_currencies)}&include_24hr_change=${encodeURIComponent(include_24hr_change)}`
+      `https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(ids)}&vs_currencies=${encodeURIComponent(vs_currencies)}&include_24hr_change=${encodeURIComponent(include_24hr_change)}`,
+      { headers: { 'User-Agent': 'DashboardApp/1.0' } }
     );
 
     if (!cryptoResponse.ok) {

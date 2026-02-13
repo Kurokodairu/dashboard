@@ -1,32 +1,25 @@
 import { useEffect, useCallback } from 'react';
 
-export default function useAutoRefresh(refreshFunction, intervalMs = 15 * 60 * 1000) { // 15 * 60 * 1000  = 15 min
-  // useCallback ensures the refresh function reference is stable
+const DEFAULT_REFRESH_INTERVAL = 15 * 60 * 1000; // 15 minutes
+
+export default function useAutoRefresh(refreshFunction, intervalMs = DEFAULT_REFRESH_INTERVAL) {
   const memoizedRefresh = useCallback(refreshFunction, [refreshFunction]);
 
   useEffect(() => {
+    // Initial fetch
     memoizedRefresh();
 
-    const handleRefresh = () => {
-      memoizedRefresh();
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        memoizedRefresh();
-      }
-    };
-
-    // Set up the interval and event listeners
-    const interval = setInterval(handleRefresh, intervalMs);
+    // Set up interval for periodic refresh
+    const interval = setInterval(memoizedRefresh, intervalMs);
+    
+    // Listen for manual refresh events
+    const handleRefresh = () => memoizedRefresh();
     window.addEventListener('dashboard-refresh', handleRefresh);
-    // document.addEventListener('visibilitychange', handleVisibilityChange); // Uncomment for refresh on visibility change
 
-    // Cleanup function to remove listeners and interval when the component unmounts
+    // Cleanup
     return () => {
       clearInterval(interval);
       window.removeEventListener('dashboard-refresh', handleRefresh);
-      // document.removeEventListener('visibilitychange', handleVisibilityChange); // Uncomment for cleanup on visibility change
     };
   }, [memoizedRefresh, intervalMs]);
 }

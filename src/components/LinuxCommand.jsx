@@ -43,10 +43,16 @@ const LinuxCommandCard = () => {
 
   if (loading) {
     return (
+      <div className="glass-card">
+        <h2 className="card-title">
+          <Terminal size={24} />
+          Linux Command
+        </h2>
         <div className="loading">
           <div className="spinner"></div>
           <p>Loading command...</p>
         </div>
+      </div>
     )
   }
 

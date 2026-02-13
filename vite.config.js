@@ -6,56 +6,13 @@ export default defineConfig({
   base: '/',
   plugins: [react()],
   server: {
-    allowedHosts: ['docker'],
+    allowedHosts: ['docker', 'devserver'],
     proxy: {
-      '/weather': {
-        target: 'https://api.met.no',
+      // API routes go to local Express server (dev only)
+      '/api': {
+        target: process.env.VITE_API_PROXY_TARGET || 'http://localhost:3000',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/weather/, '/weatherapi/locationforecast/2.0/compact'),
-        secure: true,
-        headers: {
-          'User-Agent': 'Dashboard App (kurokodairuwu@proton.me)'
-        }
       },
-      '/coingecko': {
-        target: 'https://api.coingecko.com',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/coingecko/, ''),
-        secure: true,
-        timeout: 10000,
-        configure: (proxy, options) => {
-          proxy.on('error', (err, req, res) => {
-            console.log('Proxy error:', err);
-          });
-          proxy.on('proxyReq', (proxyReq, req, res) => {
-            proxyReq.setHeader('User-Agent', 'Dashboard App (kurokodairuwu@proton.me)');
-          });
-        }
-      },
-      '/twitch': {
-        target: 'https://api.twitch.tv',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/twitch/, ''),
-        secure: true,
-        timeout: 10000,
-        configure: (proxy, options) => {
-          proxy.on('error', (err, req, res) => {
-            console.log('Twitch proxy error:', err);
-          });
-        }
-      },
-      '/suggest': {
-        target: 'https://suggestqueries.google.com',
-        changeOrigin: true,
-        secure: true,
-        rewrite: (path) =>
-          path.replace(/^\/suggest/, '/complete/search?client=firefox&q='),
-      },
-      '/github': {
-        target: 'https://api.github.com',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/github/, '/users'),
-      }
     }
   },
 })

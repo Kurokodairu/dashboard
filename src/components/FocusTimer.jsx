@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Play, Pause, RotateCcw, Clock, Coffee, Brain } from 'lucide-react'
 
 const FocusTimer = ({ isVisible = true }) => {
@@ -9,6 +9,31 @@ const FocusTimer = ({ isVisible = true }) => {
   const [sessions, setSessions] = useState(0)
   const [initialDuration, setInitialDuration] = useState(25 * 60) // Track initial duration in seconds
   const intervalRef = useRef(null)
+
+  const handleTimerComplete = useCallback(() => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(isBreak ? 'Break time over!' : 'Focus session complete!', {
+        body: isBreak ? 'Time to get back to work!' : 'Take a well-deserved break!',
+        icon: '/icon.svg'
+      })
+    }
+
+    if (isBreak) {
+      setIsBreak(false)
+      setMinutes(25)
+      setSeconds(0)
+      setInitialDuration(25 * 60)
+    } else {
+      setSessions(prev => prev + 1)
+      setIsBreak(true)
+      // Short break (5 min) or long break (15 min) every 4 sessions
+      const isLongBreak = (sessions + 1) % 4 === 0
+      const breakMinutes = isLongBreak ? 15 : 5
+      setMinutes(breakMinutes)
+      setSeconds(0)
+      setInitialDuration(breakMinutes * 60)
+    }
+  }, [isBreak, sessions])
 
   useEffect(() => {
     if (isRunning && (minutes > 0 || seconds > 0)) {
@@ -32,32 +57,7 @@ const FocusTimer = ({ isVisible = true }) => {
     }
 
     return () => clearInterval(intervalRef.current)
-  }, [isRunning, minutes, seconds])
-
-  const handleTimerComplete = () => {
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(isBreak ? 'Break time over!' : 'Focus session complete!', {
-        body: isBreak ? 'Time to get back to work!' : 'Take a well-deserved break!',
-        icon: '/icon.svg'
-      })
-    }
-
-    if (isBreak) {
-      setIsBreak(false)
-      setMinutes(25)
-      setSeconds(0)
-      setInitialDuration(25 * 60)
-    } else {
-      setSessions(prev => prev + 1)
-      setIsBreak(true)
-      // Short break (5 min) or long break (15 min) every 4 sessions
-      const isLongBreak = (sessions + 1) % 4 === 0
-      const breakMinutes = isLongBreak ? 15 : 5
-      setMinutes(breakMinutes)
-      setSeconds(0)
-      setInitialDuration(breakMinutes * 60)
-    }
-  }
+  }, [isRunning, minutes, seconds, handleTimerComplete])
 
   const toggleTimer = () => {
     setIsRunning(!isRunning)

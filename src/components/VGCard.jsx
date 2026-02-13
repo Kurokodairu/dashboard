@@ -1,13 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useState, useCallback } from 'react'
 import { Newspaper, RefreshCcw } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import useAutoRefresh from '../hooks/AutoRefresh.js'
+
+const Motion = motion
 
 const VGCard = () => {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  const fetchSummaries = async () => {
+  const fetchSummaries = useCallback(async () => {
     setLoading(true)
     setError(null)
 
@@ -24,14 +27,9 @@ const VGCard = () => {
     } finally {
       setLoading(false)
     }
-  }
-
-  // Initial + interval refresh every 30 minutes
-  useEffect(() => {
-    fetchSummaries()
-    const interval = setInterval(fetchSummaries, 30 * 60 * 1000)
-    return () => clearInterval(interval)
   }, [])
+
+  useAutoRefresh(fetchSummaries, 30 * 60 * 1000)
 
   return (
     <div className="glass-card">
@@ -58,7 +56,7 @@ const VGCard = () => {
       )}
 
       {data?.summaries && (
-        <motion.div
+        <Motion.div
           className="news-list"
           initial="hidden"
           animate="visible"
@@ -68,7 +66,7 @@ const VGCard = () => {
         >
           <AnimatePresence>
             {data.summaries.map((item, idx) => (
-              <motion.div
+              <Motion.div
                 key={item.guid || idx}
                 className="news-item"
                 initial={{ opacity: 0, y: 8 }}
@@ -80,7 +78,7 @@ const VGCard = () => {
                   {item.title}
                 </a>
                 <p className="summary">{item.summary}</p>
-              </motion.div>
+              </Motion.div>
             ))}
           </AnimatePresence>
           <p className="timestamp text-sm">
@@ -90,7 +88,7 @@ const VGCard = () => {
               minute: '2-digit',
             })}
           </p>
-        </motion.div>
+        </Motion.div>
       )}
 
       <style>{`

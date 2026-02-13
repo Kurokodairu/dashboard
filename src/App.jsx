@@ -9,103 +9,102 @@ import GithubCard from './components/GithubCard.jsx'
 import VGCard from './components/VGCard.jsx'
 import LinuxCommandCard from './components/LinuxCommand.jsx'
 import FocusTimer from './components/FocusTimer.jsx'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
+import BookmarksCard from './components/BookmarksCard.tsx'
+import CalendarCard from './components/CalendarCard.tsx'
+import useSettingsStore from './stores/settingsStore.js'
 import { motion, AnimatePresence } from 'framer-motion'
 import './App.css'
 
+const Motion = motion
+
 function App() {
   const [currentTime, setCurrentTime] = useState(new Date())
-  const [showSettings, setShowSettings] = useState(false)
-  const [cityCoords, setCityCoords] = useState(null)
-  const [githubUsername, setGithubUsername] = useState(localStorage.getItem('github-username') || 'kurokodairu')
   const [suggestionsVisible, setSuggestionsVisible] = useState(false)
 
+  // Get state and actions from Zustand store
+  const {
+    cityCoords,
+    setCityCoords,
+    githubUsername,
+    setGithubUsername,
+    calendarLink,
+    setCalendarLink,
+    widgetLayout,
+    setWidgetLayout,
+    showFocusTimer,
+    setShowFocusTimer,
+    showSettings,
+    setShowSettings,
+    toggleSettings
+  } = useSettingsStore()
 
-  // WIDGET
-  const defaultLayout = [
-  { id: 'weather', column: 'left', order: 1, visible: true },
-  { id: 'twitch', column: 'left', order: 2, visible: true },
-  { id: 'crypto', column: 'right', order: 1, visible: true },
-  { id: 'vg', column: 'right', order: 2, visible: true },
-  { id: 'github', column: 'right', order: 3, visible: true },
-  { id: 'command', column: 'left', order: 3, visible: true }
-  ]
-
-  const [widgetLayout, setWidgetLayout] = useState(() => {
-  const saved = localStorage.getItem('dashboard-layout')
-  return saved ? JSON.parse(saved) : defaultLayout
-  })
+  const renderColumn = (column) => (
+    <AnimatePresence>
+      {widgetLayout
+        .filter(w => w.column === column && w.visible)
+        .sort((a, b) => a.order - b.order)
+        .map(w => (
+          <Motion.div
+            className="widget"
+            key={w.id}
+            layout
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.9 }}
+            transition={{
+              duration: 0.4,
+              ease: 'easeInOut',
+              layout: { duration: 0.3 }
+            }}
+          >
+            {renderWidgetById(w.id)}
+          </Motion.div>
+        ))}
+    </AnimatePresence>
+  )
 
   const renderWidgetById = (id) => {
-    switch (id) {
-      case 'weather':
-        return <WeatherCard cityCoords={cityCoords} />
-      case 'twitch':
-        return <TwitchCard />
-      case 'crypto':
-        return <CryptoCard />
-      case 'github':
-        return <GithubCard username={githubUsername} />
-      case 'vg':
-        return <VGCard />
-      case 'command':
-        return <LinuxCommandCard />
-      default:
-        return null
+    const widgetMap = {
+      weather: { component: <WeatherCard cityCoords={cityCoords} />, name: 'Weather' },
+      twitch: { component: <TwitchCard />, name: 'Twitch' },
+      crypto: { component: <CryptoCard />, name: 'Crypto' },
+      github: { component: <GithubCard username={githubUsername} />, name: 'GitHub' },
+      vg: { component: <VGCard />, name: 'VG News' },
+      command: { component: <LinuxCommandCard />, name: 'Linux Command' },
+      bookmarks: { component: <BookmarksCard />, name: 'Bookmarks' },
+      calendar: { component: <CalendarCard />, name: 'Calendar' }
     }
+    
+    const widget = widgetMap[id]
+    if (!widget) return null
+    
+    return (
+      <ErrorBoundary widgetName={widget.name}>
+        {widget.component}
+      </ErrorBoundary>
+    )
   }
-
-  useEffect(() => {
-    localStorage.setItem('dashboard-layout', JSON.stringify(widgetLayout))
-  }, [widgetLayout])
-
-
-  // FOCUS TIMER
-  const [showFocusTimer, setShowFocusTimer] = useState(() => {
-    const saved = localStorage.getItem('dashboard-focus-timer')
-    return saved ? JSON.parse(saved) : false})
-
-  useEffect(() => {
-    localStorage.setItem('dashboard-focus-timer', JSON.stringify(showFocusTimer))
-  }, [showFocusTimer])
-
-
-  // City coords
-  useEffect(() => {
-    // Load saved city from localStorage on app start
-    const savedCity = localStorage.getItem('dashboard-city')
-    if (savedCity) {
-      const cityData = JSON.parse(savedCity)
-      setCityCoords(cityData)
-    }
-  }, [])
 
   const handleCitySelect = (cityData) => {
     setCityCoords(cityData)
-    localStorage.setItem('dashboard-city', JSON.stringify(cityData))
-    setShowSettings(false)
   }
 
-  // Settings panel
+  const handleSetGithubUsername = (username) => {
+    setGithubUsername(username || 'kurokodairu')
+  }
+
+  // Settings panel - toggle with Escape key
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
-        setShowSettings(prev => !prev)
+        toggleSettings()
       }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
-
-  const handleSetGithubUsername = (username) => {
-    if (username) {
-      localStorage.setItem('github-username', username)
-      setGithubUsername(username)
-    } else {
-      localStorage.removeItem('github-username')
-      setGithubUsername('')
-    }
-  }
+  }, [toggleSettings])
 
   // Handle time & Date formatting
   useEffect(() => {
@@ -137,8 +136,6 @@ function App() {
   // RETURN RENDER
   return (
     <div className="app">
-      <div className="background-gradient"></div>
-      
       <header className="header">
         <div className="time-section">
           <h1 className="time">{formatTime(currentTime)}</h1>
@@ -157,7 +154,7 @@ function App() {
 
       <AnimatePresence mode="wait">
         {showFocusTimer && (
-          <motion.div
+          <Motion.div
             key="focus-timer"
             initial={{ opacity: 0, y: -20 }}
             animate={{ 
@@ -172,65 +169,23 @@ function App() {
             }}
           >
             <FocusTimer isVisible={showFocusTimer} />
-          </motion.div>
+          </Motion.div>
         )}
       </AnimatePresence>
 
       <main className="dashboard-columns">
         <div className="left-column">
-          <AnimatePresence>
-            {widgetLayout
-              .filter(w => w.column === 'left' && w.visible)
-              .sort((a, b) => a.order - b.order)
-              .map(w => (
-                <motion.div 
-                  className="widget" 
-                  key={w.id}
-                  layout
-                  initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -20, scale: 0.9 }}
-                  transition={{ 
-                    duration: 0.4, 
-                    ease: "easeInOut",
-                    layout: { duration: 0.3 }
-                  }}
-                >
-                  {renderWidgetById(w.id)}
-                </motion.div>
-              ))}
-          </AnimatePresence>
+          {renderColumn('left')}
         </div>
 
         <div className="right-column">
-          <AnimatePresence>
-            {widgetLayout
-              .filter(w => w.column === 'right' && w.visible)
-              .sort((a, b) => a.order - b.order)
-              .map(w => (
-                <motion.div 
-                  className="widget" 
-                  key={w.id}
-                  layout
-                  initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -20, scale: 0.9 }}
-                  transition={{ 
-                    duration: 0.4, 
-                    ease: "easeInOut",
-                    layout: { duration: 0.3 }
-                  }}
-                >
-                  {renderWidgetById(w.id)}
-                </motion.div>
-              ))}
-          </AnimatePresence>
+          {renderColumn('right')}
         </div>
       </main>
 
 
       <footer className="footer">
-        <p className="footer-text">Dashboard App by <a style={{ color: 'inherit' }} href="https://github.com/Kurokodairu" target="_blank" rel="noopener noreferrer">Kurokodairu</a></p>
+        <p className="footer-text">Dashboard App by <a className="footer-link" href="https://github.com/Kurokodairu" target="_blank" rel="noopener noreferrer">Kurokodairu</a></p>
       </footer>
 
       <SettingsPanel
@@ -242,25 +197,21 @@ function App() {
         setWidgetLayout={setWidgetLayout}
         githubUsername={githubUsername}
         onGithubUsernameChange={handleSetGithubUsername}
+        calendarLink={calendarLink}
+        onCalendarLinkChange={setCalendarLink}
         showFocusTimer={showFocusTimer}
         setShowFocusTimer={setShowFocusTimer}
       />
 
-
-  {!cityCoords && (
-    <div
-      className="setup-hint"
-      tabIndex={0}
-      role="button"
-      onClick={() => setShowSettings(true)}
-      onKeyDown={e => {
-        if (e.key === 'Enter' || e.key === ' ') setShowSettings(true)
-      }}
-      style={{ cursor: 'pointer' }}
-    >
-      <p>Press <kbd>Escape</kbd> or tap here to set your city - Use <kbd>Tab</kbd> to switch search engines</p>
-    </div>
-  )}
+      {!cityCoords && (
+        <button
+          type="button"
+          className="setup-hint"
+          onClick={() => setShowSettings(true)}
+        >
+          Press <kbd>Escape</kbd> or tap here to set your city - Use <kbd>Tab</kbd> to switch search engines
+        </button>
+      )}
     </div>
   )
 }

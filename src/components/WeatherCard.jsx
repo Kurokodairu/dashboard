@@ -71,7 +71,7 @@ const WeatherCard = ({ cityCoords }) => {
 
   const getWeatherIcon = (condition) => {
     const iconUrl = `/icons/${condition}.svg`
-    return <img src={iconUrl} alt={condition} style={{ width: '48px', height: '48px' }} />
+    return <img src={iconUrl} alt={condition} className="weather-icon-image" />
   }
 
   const getWeatherDescription = (condition) => {
@@ -165,94 +165,6 @@ const WeatherCard = ({ cityCoords }) => {
           </div>
         </div>
       </div>
-
-      <style>{`
-        .weather-content {
-          display: flex;
-          flex-direction: column;
-          gap: 2rem;
-        }
-
-        .weather-main {
-          display: flex;
-          align-items: center;
-          gap: 1.5rem;
-        }
-
-        .weather-icon {
-          opacity: 0.9;
-        }
-
-        .weather-info {
-          flex: 1;
-        }
-
-        .temperature {
-          font-size: 3rem;
-          font-weight: 200;
-          line-height: 1;
-          background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
-
-        .condition {
-          font-size: 1.2rem;
-          opacity: 0.8;
-          margin-top: 0.5rem;
-        }
-
-        .weather-details {
-          display: flex;
-          gap: 2rem;
-        }
-
-        .weather-detail {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 0.5rem;
-          flex: 1;
-          padding: 1rem;
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .weather-detail span {
-          font-size: 1.1rem;
-          font-weight: 600;
-        }
-
-        .weather-detail small {
-          font-size: 0.8rem;
-          opacity: 0.7;
-        }
-
-        .no-location {
-          text-align: center;
-          padding: 2rem;
-          opacity: 0.6;
-        }
-
-        .no-location .text-sm {
-          font-size: 0.9rem;
-          margin-top: 0.5rem;
-        }
-
-        @media (max-width: 480px) {
-          .weather-main {
-            flex-direction: column;
-            text-align: center;
-          }
-          
-          .weather-details {
-            flex-direction: column;
-            gap: 1rem;
-          }
-        }
-      `}</style>
     </div>
   )
 }

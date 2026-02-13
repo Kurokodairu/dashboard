@@ -1,12 +1,17 @@
 import { useState, useEffect } from 'react'
 import { X, Search, MapPin, Settings, ArrowUp, ArrowDown, ArrowLeftRight } from 'lucide-react'
 
-const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayout, setWidgetLayout, githubUsername, onGithubUsernameChange, showFocusTimer, setShowFocusTimer }) => {
+const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayout, setWidgetLayout, githubUsername, onGithubUsernameChange, calendarLink, onCalendarLinkChange, showFocusTimer, setShowFocusTimer }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [tempGithubUsername, setTempGithubUsername] = useState('')
+  const [tempCalendarLink, setTempCalendarLink] = useState('')
+
+  useEffect(() => {
+    setTempCalendarLink(calendarLink || '')
+  }, [calendarLink, isOpen])
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -29,7 +34,7 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
         
         const data = await response.json()
         setSearchResults(data.results || [])
-      } catch (err) {
+      } catch {
         setError('Failed to search cities')
         setSearchResults([])
       } finally {
@@ -70,6 +75,15 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
     setTempGithubUsername('')
   }
 
+  const handleSetCalendarLink = () => {
+    onCalendarLinkChange(tempCalendarLink.trim())
+  }
+
+  const handleClearCalendarLink = () => {
+    onCalendarLinkChange('')
+    setTempCalendarLink('')
+  }
+
 
   // Widget management
   const handleToggleVisibility = (id) => {
@@ -80,8 +94,6 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
 
 
   const normalizeOrderValues = (layout) => {
-    const columns = ['left', 'right']
-    
     return layout.map(widget => {
       const sameColumnWidgets = layout
         .filter(w => w.column === widget.column)
@@ -313,6 +325,47 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
                 />
                 <span>Show Focus Timer</span>
               </label>
+            </div>
+          </div>
+
+          <div className="setting-section">
+            <h3>Calendar</h3>
+            <p className="setting-description">
+              Paste a public Google Calendar link, embed link, or calendar ID/email.
+            </p>
+
+            {calendarLink && (
+              <div className="current-github">
+                <span style={{ wordBreak: 'break-all' }}>{calendarLink}</span>
+                <button className="clear-button" onClick={handleClearCalendarLink}>
+                  Clear
+                </button>
+              </div>
+            )}
+
+            <div className="github-input-container">
+              <div className="github-input-wrapper">
+                <input
+                  type="text"
+                  className="github-input"
+                  placeholder="https://calendar.google.com/... or your_calendar@gmail.com"
+                  value={tempCalendarLink}
+                  onChange={(e) => setTempCalendarLink(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      handleSetCalendarLink()
+                    }
+                  }}
+                />
+                <button
+                  className="set-button"
+                  onClick={handleSetCalendarLink}
+                  disabled={!tempCalendarLink.trim()}
+                >
+                  Set
+                </button>
+              </div>
             </div>
           </div>
 

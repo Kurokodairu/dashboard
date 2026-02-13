@@ -10,20 +10,46 @@ import twitchUsersHandler from './api/twitch-users.js'
 import vgSummaryHandler from './api/vg-summary.js'
 import suggestHandler from './api/suggest.js'
 import commandHandler from './api/command.js'
+import calendarHandler from './api/calendar.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const app = express()
-const port = process.env.PORT || 8080
+const port = process.env.PORT || 3000
 
 app.set('trust proxy', true)
+
+// CORS middleware - centralized for all API routes
+const corsMiddleware = (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Client-Id')
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end()
+  }
+  
+  next()
+}
+
+// Security headers middleware
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff')
+  res.setHeader('X-Frame-Options', 'DENY')
+  res.setHeader('X-XSS-Protection', '1; mode=block')
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
+  next()
+})
 
 // Basic health endpoint
 app.get('/healthz', (req, res) => res.status(200).json({ ok: true }))
 
 // JSON body just in case (most endpoints are GET)
 app.use(express.json())
+
+// Apply CORS to all API routes
+app.use('/api', corsMiddleware)
 
 // Serve static assets from dist
 const distDir = path.join(__dirname, 'dist')
@@ -37,7 +63,6 @@ apiRouter.get('/config', (req, res) => {
   const twitchClientId = process.env.VITE_TWITCH_CLIENT_ID || process.env.TWITCH_CLIENT_ID || ''
   const twitchRedirectUri = process.env.VITE_TWITCH_REDIRECT_URI || process.env.TWITCH_REDIRECT_URI || ''
 
-  res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Cache-Control', 'public, max-age=300')
   return res.status(200).json({
     twitchClientId,
@@ -54,13 +79,7 @@ apiRouter.get('/twitch-users', twitchUsersHandler)
 apiRouter.get('/vg-summary', vgSummaryHandler)
 apiRouter.get('/suggest', suggestHandler)
 apiRouter.get('/command', commandHandler)
-
-apiRouter.options('*', (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Client-Id')
-  res.status(200).end()
-})
+apiRouter.get('/calendar', calendarHandler)
 
 app.use('/api', apiRouter)
 

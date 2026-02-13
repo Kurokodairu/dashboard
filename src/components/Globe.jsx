@@ -14,7 +14,6 @@ const Globe = ({onClick}) => {
     
     try {
       const cityCoords = JSON.parse(localStorage.getItem('dashboard-city'))
-      console.log('User location added to globe markers:', cityCoords)
       if (cityCoords && cityCoords.latitude && cityCoords.longitude) {
         markers.push({
           location: [cityCoords.latitude, cityCoords.longitude],
