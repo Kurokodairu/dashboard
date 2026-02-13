@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     }
 
     // Convert comma-separated IDs to query parameters
-    const idParams = ids.split(',').map(id => `id=${id}`).join('&');
+    const idParams = ids.split(',').map(id => `id=${encodeURIComponent(id.trim())}`).join('&');
 
     // Make request to Twitch API using user's access token
     const twitchResponse = await fetch(
