@@ -10,7 +10,7 @@ import VGCard from './components/VGCard.jsx'
 import LinuxCommandCard from './components/LinuxCommand.jsx'
 import FocusTimer from './components/FocusTimer.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
-import BookmarksCard from './components/BookmarksCard.tsx'
+import BookmarksBar from './components/BookmarksBar.jsx'
 import CalendarCard from './components/CalendarCard.tsx'
 import useSettingsStore from './stores/settingsStore.js'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -72,7 +72,7 @@ function App() {
       github: { component: <GithubCard username={githubUsername} />, name: 'GitHub' },
       vg: { component: <VGCard />, name: 'VG News' },
       command: { component: <LinuxCommandCard />, name: 'Linux Command' },
-      bookmarks: { component: <BookmarksCard />, name: 'Bookmarks' },
+
       calendar: { component: <CalendarCard />, name: 'Calendar' }
     }
     
@@ -150,6 +150,7 @@ function App() {
         </div>
       </header>
 
+      <BookmarksBar />
       <SmartSearchBar onSuggestionsChange={setSuggestionsVisible} />
 
       <AnimatePresence mode="wait">

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { X, Search, MapPin, Settings, ArrowUp, ArrowDown, ArrowLeftRight } from 'lucide-react'
+import { X, Search, MapPin, Settings, ArrowUp, ArrowDown, ArrowLeftRight, Trash2, Plus, Bookmark } from 'lucide-react'
+import useSettingsStore from '../stores/settingsStore'
 
 const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayout, setWidgetLayout, githubUsername, onGithubUsernameChange, calendarLink, onCalendarLinkChange, showFocusTimer, setShowFocusTimer }) => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -8,6 +9,49 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
   const [error, setError] = useState(null)
   const [tempGithubUsername, setTempGithubUsername] = useState('')
   const [tempCalendarLink, setTempCalendarLink] = useState('')
+
+  // Bookmarks management from store
+  const { bookmarks, setBookmarks } = useSettingsStore()
+  const [newBmTitle, setNewBmTitle] = useState('')
+  const [newBmUrl, setNewBmUrl] = useState('')
+
+  const handleAddBookmark = () => {
+    if (!newBmTitle.trim() || !newBmUrl.trim()) return
+    const url = newBmUrl.trim().startsWith('http') ? newBmUrl.trim() : `https://${newBmUrl.trim()}`
+    try { new URL(url) } catch { return }
+    const bm = {
+      id: Date.now().toString(),
+      title: newBmTitle.trim(),
+      url,
+      folder: 'default',
+      createdAt: new Date().toISOString()
+    }
+    setBookmarks([...bookmarks, bm])
+    setNewBmTitle('')
+    setNewBmUrl('')
+  }
+
+  const handleDeleteBookmark = (id) => {
+    setBookmarks(bookmarks.filter(b => b.id !== id))
+  }
+
+  const handleMoveBookmarkUp = (index) => {
+    if (index === 0) return
+    const newBookmarks = [...bookmarks]
+    ;[newBookmarks[index], newBookmarks[index - 1]] = [newBookmarks[index - 1], newBookmarks[index]]
+    setBookmarks(newBookmarks)
+  }
+
+  const handleMoveBookmarkDown = (index) => {
+    if (index === bookmarks.length - 1) return
+    const newBookmarks = [...bookmarks]
+    ;[newBookmarks[index], newBookmarks[index + 1]] = [newBookmarks[index + 1], newBookmarks[index]]
+    setBookmarks(newBookmarks)
+  }
+
+  const getFaviconUrl = (url) => {
+    try { return `https://www.google.com/s2/favicons?domain=${new URL(url).hostname}&sz=32` } catch { return null }
+  }
 
   useEffect(() => {
     setTempCalendarLink(calendarLink || '')
@@ -366,6 +410,61 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
                   Set
                 </button>
               </div>
+            </div>
+          </div>
+
+          <div className="setting-section">
+            <h3><Bookmark size={18} style={{verticalAlign: 'middle', marginRight: 6}} />Bookmarks</h3>
+            <p className="setting-description">Manage your quick-access bookmarks shown above the search bar.</p>
+
+            <div className="bm-add-row">
+              <input
+                type="text"
+                className="github-input"
+                placeholder="Title"
+                value={newBmTitle}
+                onChange={(e) => setNewBmTitle(e.target.value)}
+              />
+              <input
+                type="text"
+                className="github-input"
+                placeholder="URL"
+                value={newBmUrl}
+                onChange={(e) => setNewBmUrl(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddBookmark() } }}
+              />
+              <button className="set-button" onClick={handleAddBookmark} disabled={!newBmTitle.trim() || !newBmUrl.trim()}>
+                <Plus size={16} />
+              </button>
+            </div>
+
+            {bookmarks.length === 0 && (
+              <p className="setting-description" style={{textAlign:'center', marginTop:'1rem'}}>No bookmarks yet.</p>
+            )}
+
+            <div className="bm-list">
+              {bookmarks.map((bm, index) => (
+                <div key={bm.id} className="bm-item">
+                  {getFaviconUrl(bm.url) && (
+                    <img src={getFaviconUrl(bm.url)} alt="" className="bm-favicon" onError={(e) => e.currentTarget.style.display='none'} />
+                  )}
+                  <div className="bm-info">
+                    <span className="bm-title">{bm.title}</span>
+                    <span className="bm-url">{(() => { try { return new URL(bm.url).hostname } catch { return bm.url } })()}</span>
+                  </div>
+                  <div className="bm-actions">
+                    <button className="bm-action-btn" onClick={() => handleMoveBookmarkUp(index)} disabled={index === 0} title="Move up">
+                      <ArrowUp size={14} />
+                    </button>
+                    <button className="bm-action-btn" onClick={() => handleMoveBookmarkDown(index)} disabled={index === bookmarks.length - 1} title="Move down">
+                      <ArrowDown size={14} />
+                    </button>
+                    <button className="clear-button" onClick={() => handleDeleteBookmark(bm.id)} title="Remove">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -947,6 +1046,106 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+
+        .bm-add-row {
+          display: flex;
+          gap: 0.5rem;
+          align-items: center;
+          margin-bottom: 0.75rem;
+        }
+
+        .bm-add-row input {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .bm-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          max-height: 250px;
+          overflow-y: auto;
+        }
+
+        .bm-item {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          padding: 0.6rem 0.75rem;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+          transition: background 0.15s ease;
+        }
+
+        .bm-item:hover {
+          background: rgba(255, 255, 255, 0.08);
+        }
+
+        .bm-favicon {
+          width: 16px;
+          height: 16px;
+          border-radius: 3px;
+          flex-shrink: 0;
+        }
+
+        .bm-info {
+          flex: 1;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 1px;
+        }
+
+        .bm-title {
+          font-size: 0.85rem;
+          font-weight: 500;
+          color: #fff;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .bm-url {
+          font-size: 0.72rem;
+          color: rgba(255, 255, 255, 0.45);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .bm-actions {
+          display: flex;
+          gap: 0.3rem;
+          align-items: center;
+          flex-shrink: 0;
+        }
+
+        .bm-action-btn {
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          color: rgba(255, 255, 255, 0.6);
+          width: 24px;
+          height: 24px;
+          padding: 0;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+
+        .bm-action-btn:hover:not(:disabled) {
+          background: rgba(255, 255, 255, 0.15);
+          color: #fff;
+          border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .bm-action-btn:disabled {
+          opacity: 0.35;
+          cursor: not-allowed;
         }
 
         @media (max-width: 480px) {

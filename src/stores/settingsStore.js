@@ -4,7 +4,6 @@ import { persist } from 'zustand/middleware'
 const DEFAULT_WIDGET_LAYOUT = [
   { id: 'weather', column: 'left', order: 1, visible: true },
   { id: 'twitch', column: 'left', order: 2, visible: true },
-  { id: 'bookmarks', column: 'left', order: 3, visible: true },
   { id: 'crypto', column: 'right', order: 1, visible: true },
   { id: 'vg', column: 'right', order: 2, visible: true },
   { id: 'github', column: 'right', order: 3, visible: true },
@@ -35,6 +34,10 @@ const useSettingsStore = create(
       calendarLink: '',
       setCalendarLink: (calendarLink) => set({ calendarLink }),
 
+      // Bookmarks
+      bookmarks: [],
+      setBookmarks: (bookmarks) => set({ bookmarks }),
+
       // Widget layout configuration
       widgetLayout: DEFAULT_WIDGET_LAYOUT,
       setWidgetLayout: (layoutOrUpdater) =>
@@ -61,6 +64,7 @@ const useSettingsStore = create(
         cityCoords: null,
         githubUsername: 'kurokodairu',
         calendarLink: '',
+        bookmarks: [],
         widgetLayout: DEFAULT_WIDGET_LAYOUT,
         showFocusTimer: false,
         showSettings: false
@@ -77,7 +81,8 @@ const useSettingsStore = create(
         return {
           ...persistedState,
           widgetLayout: getSafeWidgetLayout(persistedState.widgetLayout),
-          calendarLink: typeof persistedState.calendarLink === 'string' ? persistedState.calendarLink : ''
+          calendarLink: typeof persistedState.calendarLink === 'string' ? persistedState.calendarLink : '',
+          bookmarks: Array.isArray(persistedState.bookmarks) ? persistedState.bookmarks : []
         }
       },
       merge: (persistedState, currentState) => {
@@ -88,7 +93,8 @@ const useSettingsStore = create(
           ...currentState,
           ...typedPersistedState,
           widgetLayout: getSafeWidgetLayout(typedPersistedState.widgetLayout),
-          calendarLink: typeof typedPersistedState.calendarLink === 'string' ? typedPersistedState.calendarLink : ''
+          calendarLink: typeof typedPersistedState.calendarLink === 'string' ? typedPersistedState.calendarLink : '',
+          bookmarks: Array.isArray(typedPersistedState.bookmarks) ? typedPersistedState.bookmarks : []
         }
       }
     }
