@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { X, Search, MapPin, Settings, ArrowUp, ArrowDown, ArrowLeftRight } from 'lucide-react'
 
-const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayout, setWidgetLayout }) => {
+const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayout, setWidgetLayout, bookmarks, onUpdateBookmarks }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState([])
   const [loading, setLoading] = useState(false)
@@ -28,7 +28,7 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
         
         const data = await response.json()
         setSearchResults(data.results || [])
-      } catch (err) {
+      } catch {
         setError('Failed to search cities')
         setSearchResults([])
       } finally {
@@ -66,8 +66,6 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
 
 
   const normalizeOrderValues = (layout) => {
-    const columns = ['left', 'right']
-    
     return layout.map(widget => {
       const sameColumnWidgets = layout
         .filter(w => w.column === widget.column)
@@ -158,6 +156,11 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
   // TWITCH LOGOUT
   const [isTwitchLoggedIn, setIsTwitchLoggedIn] = useState(false)
 
+  // Bookmark management state
+  const [newBookmarkName, setNewBookmarkName] = useState('')
+  const [newBookmarkUrl, setNewBookmarkUrl] = useState('')
+  const [newBookmarkIcon, setNewBookmarkIcon] = useState('')
+
   useEffect(() => {
     const token = localStorage.getItem('twitch-access-token')
     setIsTwitchLoggedIn(!!token)
@@ -169,6 +172,26 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
     window.dispatchEvent(new Event('twitch-logout'))
   }
 }
+
+  const handleAddBookmark = (e) => {
+    e.preventDefault()
+    if (newBookmarkName.trim() && newBookmarkUrl.trim()) {
+      const newBookmark = {
+        id: Date.now().toString(),
+        name: newBookmarkName.trim(),
+        url: newBookmarkUrl.trim(),
+        icon: newBookmarkIcon.trim()
+      }
+      onUpdateBookmarks([...bookmarks, newBookmark])
+      setNewBookmarkName('')
+      setNewBookmarkUrl('')
+      setNewBookmarkIcon('')
+    }
+  }
+
+  const handleRemoveBookmark = (bookmarkId) => {
+    onUpdateBookmarks(bookmarks.filter(b => b.id !== bookmarkId))
+  }
 
 
   return (
@@ -270,6 +293,63 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
                       </div>
                 </div>
               ))}
+          </div>
+
+          <div className="bookmark-settings">
+            <h3>Bookmarks</h3>
+            <form onSubmit={handleAddBookmark} className="bookmark-add-form">
+              <div className="bookmark-form-row">
+                <input
+                  type="text"
+                  placeholder="Name"
+                  value={newBookmarkName}
+                  onChange={(e) => setNewBookmarkName(e.target.value)}
+                  className="bookmark-input"
+                />
+                <input
+                  type="url"
+                  placeholder="URL"
+                  value={newBookmarkUrl}
+                  onChange={(e) => setNewBookmarkUrl(e.target.value)}
+                  className="bookmark-input"
+                />
+              </div>
+              <div className="bookmark-form-row">
+                <input
+                  type="text"
+                  placeholder="Icon (emoji, optional)"
+                  value={newBookmarkIcon}
+                  onChange={(e) => setNewBookmarkIcon(e.target.value)}
+                  className="bookmark-input-small"
+                  maxLength="2"
+                />
+                <button type="submit" className="bookmark-add-button">
+                  Add Bookmark
+                </button>
+              </div>
+            </form>
+
+            {bookmarks && bookmarks.length > 0 && (
+              <div className="bookmark-list">
+                {bookmarks.map(bookmark => (
+                  <div key={bookmark.id} className="bookmark-item">
+                    <div className="bookmark-item-info">
+                      {bookmark.icon && <span className="bookmark-item-icon">{bookmark.icon}</span>}
+                      <div className="bookmark-item-text">
+                        <div className="bookmark-item-name">{bookmark.name}</div>
+                        <div className="bookmark-item-url">{bookmark.url}</div>
+                      </div>
+                    </div>
+                    <button
+                      className="bookmark-remove-button"
+                      onClick={() => handleRemoveBookmark(bookmark.id)}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
        </div>
       </div>
@@ -682,6 +762,159 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
           font-weight: 600;
           margin-bottom: 1rem;
           color: white;
+        }
+
+        /* Bookmark settings */
+        .bookmark-settings {
+          margin-top: 1.5rem;
+        }
+
+        .bookmark-settings h3 {
+          font-size: 1.2rem;
+          font-weight: 600;
+          margin-bottom: 1rem;
+          color: white;
+        }
+
+        .bookmark-add-form {
+          margin-bottom: 1rem;
+        }
+
+        .bookmark-form-row {
+          display: flex;
+          gap: 0.5rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .bookmark-input {
+          flex: 1;
+          padding: 0.75rem;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 8px;
+          color: white;
+          font-size: 0.9rem;
+          transition: all 0.2s ease;
+        }
+
+        .bookmark-input-small {
+          width: 80px;
+          padding: 0.75rem;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 8px;
+          color: white;
+          font-size: 0.9rem;
+          text-align: center;
+          transition: all 0.2s ease;
+        }
+
+        .bookmark-input:focus,
+        .bookmark-input-small:focus {
+          outline: none;
+          background: rgba(255, 255, 255, 0.15);
+          border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .bookmark-input::placeholder,
+        .bookmark-input-small::placeholder {
+          color: rgba(255, 255, 255, 0.5);
+        }
+
+        .bookmark-add-button {
+          flex: 1;
+          padding: 0.75rem 1rem;
+          background: rgba(255, 255, 255, 0.15);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          border-radius: 8px;
+          color: white;
+          font-size: 0.9rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .bookmark-add-button:hover {
+          background: rgba(255, 255, 255, 0.2);
+          border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .bookmark-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          max-height: 300px;
+          overflow-y: auto;
+        }
+
+        .bookmark-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.75rem;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
+          transition: all 0.2s ease;
+        }
+
+        .bookmark-item:hover {
+          background: rgba(255, 255, 255, 0.08);
+          border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .bookmark-item-info {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          flex: 1;
+          min-width: 0;
+        }
+
+        .bookmark-item-icon {
+          font-size: 1.25rem;
+          flex-shrink: 0;
+        }
+
+        .bookmark-item-text {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .bookmark-item-name {
+          font-weight: 500;
+          font-size: 0.95rem;
+          color: white;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .bookmark-item-url {
+          font-size: 0.75rem;
+          opacity: 0.7;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .bookmark-remove-button {
+          background: rgba(255, 107, 107, 0.2);
+          border: 1px solid rgba(255, 107, 107, 0.3);
+          color: #ff6b6b;
+          padding: 0.5rem;
+          border-radius: 6px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+          flex-shrink: 0;
+        }
+
+        .bookmark-remove-button:hover {
+          background: rgba(255, 107, 107, 0.3);
+          border-color: rgba(255, 107, 107, 0.5);
         }
 
         /* Improve the overall layout */
