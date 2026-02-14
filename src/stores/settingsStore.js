@@ -15,6 +15,10 @@ const getSafeWidgetLayout = (value) => {
   return Array.isArray(value) ? value : DEFAULT_WIDGET_LAYOUT
 }
 
+const validateBackgroundTheme = (value) => {
+  return typeof value === 'string' && ['transparent', 'dark'].includes(value) ? value : 'transparent'
+}
+
 /**
  * Settings store for dashboard configuration
  * Persists to localStorage automatically
@@ -88,7 +92,7 @@ const useSettingsStore = create(
           widgetLayout: getSafeWidgetLayout(persistedState.widgetLayout),
           calendarLink: typeof persistedState.calendarLink === 'string' ? persistedState.calendarLink : '',
           bookmarks: Array.isArray(persistedState.bookmarks) ? persistedState.bookmarks : [],
-          backgroundTheme: typeof persistedState.backgroundTheme === 'string' && ['transparent', 'dark'].includes(persistedState.backgroundTheme) ? persistedState.backgroundTheme : 'transparent'
+          backgroundTheme: validateBackgroundTheme(persistedState.backgroundTheme)
         }
       },
       merge: (persistedState, currentState) => {
@@ -101,7 +105,7 @@ const useSettingsStore = create(
           widgetLayout: getSafeWidgetLayout(typedPersistedState.widgetLayout),
           calendarLink: typeof typedPersistedState.calendarLink === 'string' ? typedPersistedState.calendarLink : '',
           bookmarks: Array.isArray(typedPersistedState.bookmarks) ? typedPersistedState.bookmarks : [],
-          backgroundTheme: typeof typedPersistedState.backgroundTheme === 'string' && ['transparent', 'dark'].includes(typedPersistedState.backgroundTheme) ? typedPersistedState.backgroundTheme : 'transparent'
+          backgroundTheme: validateBackgroundTheme(typedPersistedState.backgroundTheme)
         }
       }
     }
