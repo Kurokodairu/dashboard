@@ -5,7 +5,7 @@ import TwitchCard from './components/TwitchCard.jsx'
 import Globe from './components/Globe.jsx'
 import SettingsPanel from './components/SettingsPanel.jsx'
 import SmartSearchBar from './components/SmartSearchBar.jsx'
-import { motion } from 'framer-motion'
+import BookmarkBar from './components/BookmarkBar.jsx'
 import './App.css'
 
 function App() {
@@ -24,6 +24,11 @@ function App() {
   return saved ? JSON.parse(saved) : defaultLayout
   })
 
+  const [bookmarks, setBookmarks] = useState(() => {
+    const saved = localStorage.getItem('dashboard-bookmarks')
+    return saved ? JSON.parse(saved) : []
+  })
+
   const renderWidgetById = (id) => {
     switch (id) {
       case 'weather':
@@ -40,6 +45,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem('dashboard-layout', JSON.stringify(widgetLayout))
   }, [widgetLayout])
+
+  useEffect(() => {
+    localStorage.setItem('dashboard-bookmarks', JSON.stringify(bookmarks))
+  }, [bookmarks])
 
   useEffect(() => {
     // Load saved city from localStorage on app start
@@ -66,6 +75,18 @@ function App() {
     setCityCoords(cityData)
     localStorage.setItem('dashboard-city', JSON.stringify(cityData))
     setShowSettings(false)
+  }
+
+  const handleAddBookmark = (bookmark) => {
+    setBookmarks(prev => [...prev, bookmark])
+  }
+
+  const handleRemoveBookmark = (bookmarkId) => {
+    setBookmarks(prev => prev.filter(b => b.id !== bookmarkId))
+  }
+
+  const handleUpdateBookmarks = (newBookmarks) => {
+    setBookmarks(newBookmarks)
   }
 
 
@@ -113,6 +134,11 @@ function App() {
         </div>
       </header>
 
+      <BookmarkBar 
+        bookmarks={bookmarks}
+        onAddBookmark={handleAddBookmark}
+        onRemoveBookmark={handleRemoveBookmark}
+      />
       <SmartSearchBar />
       <main className="dashboard-columns">
         <div className="left-column">
@@ -150,6 +176,8 @@ function App() {
         currentCity={cityCoords}
         widgetLayout={widgetLayout}
         setWidgetLayout={setWidgetLayout}
+        bookmarks={bookmarks}
+        onUpdateBookmarks={handleUpdateBookmarks}
       />
 
 
