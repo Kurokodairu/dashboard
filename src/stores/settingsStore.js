@@ -54,6 +54,10 @@ const useSettingsStore = create(
       showFocusTimer: false,
       setShowFocusTimer: (show) => set({ showFocusTimer: show }),
 
+      // Background theme ('transparent' or 'dark')
+      backgroundTheme: 'transparent',
+      setBackgroundTheme: (theme) => set({ backgroundTheme: theme }),
+
       // Settings panel state
       showSettings: false,
       setShowSettings: (show) => set({ showSettings: show }),
@@ -67,6 +71,7 @@ const useSettingsStore = create(
         bookmarks: [],
         widgetLayout: DEFAULT_WIDGET_LAYOUT,
         showFocusTimer: false,
+        backgroundTheme: 'transparent',
         showSettings: false
       })
     }),
@@ -82,7 +87,8 @@ const useSettingsStore = create(
           ...persistedState,
           widgetLayout: getSafeWidgetLayout(persistedState.widgetLayout),
           calendarLink: typeof persistedState.calendarLink === 'string' ? persistedState.calendarLink : '',
-          bookmarks: Array.isArray(persistedState.bookmarks) ? persistedState.bookmarks : []
+          bookmarks: Array.isArray(persistedState.bookmarks) ? persistedState.bookmarks : [],
+          backgroundTheme: typeof persistedState.backgroundTheme === 'string' && ['transparent', 'dark'].includes(persistedState.backgroundTheme) ? persistedState.backgroundTheme : 'transparent'
         }
       },
       merge: (persistedState, currentState) => {
@@ -94,7 +100,8 @@ const useSettingsStore = create(
           ...typedPersistedState,
           widgetLayout: getSafeWidgetLayout(typedPersistedState.widgetLayout),
           calendarLink: typeof typedPersistedState.calendarLink === 'string' ? typedPersistedState.calendarLink : '',
-          bookmarks: Array.isArray(typedPersistedState.bookmarks) ? typedPersistedState.bookmarks : []
+          bookmarks: Array.isArray(typedPersistedState.bookmarks) ? typedPersistedState.bookmarks : [],
+          backgroundTheme: typeof typedPersistedState.backgroundTheme === 'string' && ['transparent', 'dark'].includes(typedPersistedState.backgroundTheme) ? typedPersistedState.backgroundTheme : 'transparent'
         }
       }
     }
