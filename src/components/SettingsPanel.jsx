@@ -11,7 +11,7 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
   const [tempCalendarLink, setTempCalendarLink] = useState('')
 
   // Bookmarks management from store
-  const { bookmarks, setBookmarks } = useSettingsStore()
+  const { bookmarks, setBookmarks, backgroundTheme, setBackgroundTheme } = useSettingsStore()
   const [newBmTitle, setNewBmTitle] = useState('')
   const [newBmUrl, setNewBmUrl] = useState('')
 
@@ -368,6 +368,35 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
                   onChange={(e) => setShowFocusTimer(e.target.checked)}
                 />
                 <span>Show Focus Timer</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="setting-section">
+            <h3>Background Theme</h3>
+            <p className="setting-description">
+              Choose between transparent background (for Zen browser) or dark modern gradient.
+            </p>
+            <div className="background-theme-toggle">
+              <label className="theme-option">
+                <input
+                  type="radio"
+                  name="backgroundTheme"
+                  value="transparent"
+                  checked={backgroundTheme === 'transparent'}
+                  onChange={(e) => setBackgroundTheme(e.target.value)}
+                />
+                <span>Transparent (Default)</span>
+              </label>
+              <label className="theme-option">
+                <input
+                  type="radio"
+                  name="backgroundTheme"
+                  value="dark"
+                  checked={backgroundTheme === 'dark'}
+                  onChange={(e) => setBackgroundTheme(e.target.value)}
+                />
+                <span>Dark Modern</span>
               </label>
             </div>
           </div>
@@ -896,6 +925,65 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
         }
 
         .toggle-label input[type="checkbox"]:hover {
+          background: rgba(255, 255, 255, 0.15);
+        }
+
+        .background-theme-toggle {
+          margin-top: 1rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+
+        .theme-option {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          cursor: pointer;
+          font-size: 1rem;
+          font-weight: 500;
+          padding: 1rem;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          transition: all 0.2s ease;
+        }
+
+        .theme-option:hover {
+          background: rgba(255, 255, 255, 0.08);
+          border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .theme-option input[type="radio"] {
+          width: 18px;
+          height: 18px;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          border-radius: 50%;
+          cursor: pointer;
+          appearance: none;
+          transition: all 0.2s ease;
+          position: relative;
+        }
+
+        .theme-option input[type="radio"]:checked {
+          background: rgba(59, 130, 246, 0.3);
+          border-color: rgba(59, 130, 246, 0.6);
+        }
+
+        .theme-option input[type="radio"]:checked::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 8px;
+          height: 8px;
+          background: white;
+          border-radius: 50%;
+        }
+
+        .theme-option input[type="radio"]:hover {
           background: rgba(255, 255, 255, 0.15);
         }
 
