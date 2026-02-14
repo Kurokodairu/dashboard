@@ -66,7 +66,7 @@ const BookmarkBar = ({ bookmarks, onAddBookmark, onRemoveBookmark }) => {
               }}
             />
           )}
-          <div className="bookmark-letter" style={{ display: bookmark.icon ? 'none' : 'none' }}>
+          <div className="bookmark-letter" style={{ display: bookmark.icon ? 'none' : 'flex' }}>
             {bookmark.name.charAt(0).toUpperCase()}
           </div>
         </div>
