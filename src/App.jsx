@@ -36,7 +36,8 @@ function App() {
     setShowFocusTimer,
     showSettings,
     setShowSettings,
-    toggleSettings
+    toggleSettings,
+    backgroundTheme
   } = useSettingsStore()
 
   const renderWidgetById = (id) => {
@@ -133,7 +134,7 @@ function App() {
 
   // RETURN RENDER
   return (
-    <div className="app">
+    <div className={`app ${backgroundTheme === 'dark' ? 'dark-theme' : ''}`}>
       <header className="header">
         <div className="time-section">
           <h1 className="time">{formatTime(currentTime)}</h1>

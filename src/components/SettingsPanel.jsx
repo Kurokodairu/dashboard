@@ -12,7 +12,7 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
   const [tempCalendarLink, setTempCalendarLink] = useState('')
 
   // Bookmarks management from store
-  const { bookmarks, setBookmarks } = useSettingsStore()
+  const { bookmarks, setBookmarks, backgroundTheme, setBackgroundTheme } = useSettingsStore()
   const [newBmTitle, setNewBmTitle] = useState('')
   const [newBmUrl, setNewBmUrl] = useState('')
 
@@ -385,6 +385,35 @@ const SettingsPanel = ({ isOpen, onClose, onCitySelect, currentCity, widgetLayou
                   onChange={(e) => setShowFocusTimer(e.target.checked)}
                 />
                 <span>Show Focus Timer</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="setting-section">
+            <h3>Background Theme</h3>
+            <p className="setting-description">
+              Choose between transparent background (for Zen browser) or dark modern gradient.
+            </p>
+            <div className="background-theme-toggle">
+              <label className="theme-option">
+                <input
+                  type="radio"
+                  name="backgroundTheme"
+                  value="transparent"
+                  checked={backgroundTheme === 'transparent'}
+                  onChange={(e) => setBackgroundTheme(e.target.value)}
+                />
+                <span>Transparent (Default)</span>
+              </label>
+              <label className="theme-option">
+                <input
+                  type="radio"
+                  name="backgroundTheme"
+                  value="dark"
+                  checked={backgroundTheme === 'dark'}
+                  onChange={(e) => setBackgroundTheme(e.target.value)}
+                />
+                <span>Dark Modern</span>
               </label>
             </div>
           </div>

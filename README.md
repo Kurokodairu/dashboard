@@ -3,6 +3,9 @@
 - Node.js 18+ and npm
 - Docker (optional, for containerized deployment)
 
+Self publishing:
+- Pushing to main -> Github actions -> Dockerhub -> watchtower in docker compose -> updated image -> live website
+
 ### Development Setup
 
  **Install dependencies**

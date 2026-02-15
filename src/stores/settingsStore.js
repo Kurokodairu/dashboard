@@ -15,6 +15,10 @@ const getSafeWidgetLayout = (value) => {
   return Array.isArray(value) ? value : DEFAULT_WIDGET_LAYOUT
 }
 
+const validateBackgroundTheme = (value) => {
+  return typeof value === 'string' && ['transparent', 'dark'].includes(value) ? value : 'transparent'
+}
+
 /**
  * Settings store for dashboard configuration
  * Persists to localStorage automatically
@@ -54,6 +58,10 @@ const useSettingsStore = create(
       showFocusTimer: false,
       setShowFocusTimer: (show) => set({ showFocusTimer: show }),
 
+      // Background theme ('transparent' or 'dark')
+      backgroundTheme: 'transparent',
+      setBackgroundTheme: (theme) => set({ backgroundTheme: theme }),
+
       // Settings panel state
       showSettings: false,
       setShowSettings: (show) => set({ showSettings: show }),
@@ -67,6 +75,7 @@ const useSettingsStore = create(
         bookmarks: [],
         widgetLayout: DEFAULT_WIDGET_LAYOUT,
         showFocusTimer: false,
+        backgroundTheme: 'transparent',
         showSettings: false
       })
     }),
@@ -157,7 +166,8 @@ const useSettingsStore = create(
           ...state,
           widgetLayout: getSafeWidgetLayout(state.widgetLayout),
           calendarLink: typeof state.calendarLink === 'string' ? state.calendarLink : '',
-          bookmarks: Array.isArray(state.bookmarks) ? state.bookmarks : []
+          bookmarks: Array.isArray(state.bookmarks) ? state.bookmarks : [],
+          backgroundTheme: validateBackgroundTheme(persistedState.backgroundTheme)
         }
       },
       merge: (persistedState, currentState) => {
@@ -169,7 +179,8 @@ const useSettingsStore = create(
           ...typedPersistedState,
           widgetLayout: getSafeWidgetLayout(typedPersistedState.widgetLayout),
           calendarLink: typeof typedPersistedState.calendarLink === 'string' ? typedPersistedState.calendarLink : '',
-          bookmarks: Array.isArray(typedPersistedState.bookmarks) ? typedPersistedState.bookmarks : []
+          bookmarks: Array.isArray(typedPersistedState.bookmarks) ? typedPersistedState.bookmarks : [],
+          backgroundTheme: validateBackgroundTheme(typedPersistedState.backgroundTheme)
         }
       }
     }
