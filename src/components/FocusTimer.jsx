@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Play, Pause, RotateCcw, Clock, Coffee, Brain } from 'lucide-react'
+import './FocusTimer.css'
 
 const FocusTimer = ({ isVisible = true }) => {
   const [minutes, setMinutes] = useState(25)
@@ -103,7 +104,7 @@ const FocusTimer = ({ isVisible = true }) => {
     <div className="focus-timer">
       <div className="timer-container">
         <div className="timer-header">
-          <div className="timer-icon">
+          <div className="timer-icon" style={{ color: isBreak ? '#22c55e' : '#3b82f6' }}>
             {isBreak ? <Coffee size={20} /> : <Brain size={20} />}
           </div>
           <span className="timer-mode">
@@ -174,171 +175,24 @@ const FocusTimer = ({ isVisible = true }) => {
           <button 
             className={`control-button primary ${isRunning ? 'pause' : 'play'}`}
             onClick={toggleTimer}
+            style={{
+              background: isBreak ? 'rgba(34, 197, 94, 0.2)' : 'rgba(59, 130, 246, 0.2)',
+              borderColor: isBreak ? 'rgba(34, 197, 94, 0.4)' : 'rgba(59, 130, 246, 0.4)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = isBreak ? 'rgba(34, 197, 94, 0.3)' : 'rgba(59, 130, 246, 0.3)'
+              e.currentTarget.style.borderColor = isBreak ? 'rgba(34, 197, 94, 0.6)' : 'rgba(59, 130, 246, 0.6)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = isBreak ? 'rgba(34, 197, 94, 0.2)' : 'rgba(59, 130, 246, 0.2)'
+              e.currentTarget.style.borderColor = isBreak ? 'rgba(34, 197, 94, 0.4)' : 'rgba(59, 130, 246, 0.4)'
+            }}
           >
             {isRunning ? <Pause size={24} /> : <Play size={24} />}
           </button>
           <div className="control-spacer"></div>
         </div>
       </div>
-
-      <style>{`
-        .focus-timer {
-          display: flex;
-          justify-content: center;
-          width: 100%;
-          margin: 1rem 0 2rem 0;
-          z-index: 5;
-        }
-
-        .timer-container {
-          background: rgba(255, 255, 255, 0.08);
-          backdrop-filter: blur(12px);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          border-radius: 20px;
-          padding: 1.5rem;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-          min-width: 280px;
-          max-width: 320px;
-        }
-
-        .timer-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 1rem;
-          color: white;
-        }
-
-        .timer-icon {
-          display: flex;
-          align-items: center;
-          color: ${isBreak ? '#22c55e' : '#3b82f6'};
-        }
-
-        .timer-mode {
-          font-weight: 600;
-          font-size: 1rem;
-        }
-
-        .session-counter {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          font-size: 0.9rem;
-          opacity: 0.8;
-        }
-
-        .timer-display {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          margin-bottom: 1.5rem;
-          position: relative;
-        }
-
-        .time-controls {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-          margin-bottom: 1rem;
-        }
-
-        .time-adjust {
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          color: white;
-          padding: 0.4rem 0.8rem;
-          border-radius: 8px;
-          font-size: 0.8rem;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .time-adjust:hover:not(:disabled) {
-          background: rgba(255, 255, 255, 0.2);
-        }
-
-        .time-adjust:disabled {
-          opacity: 0.4;
-          cursor: not-allowed;
-        }
-
-        .time-text {
-          font-size: 2.5rem;
-          font-weight: 700;
-          color: white;
-          font-family: 'Courier New', monospace;
-          text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-          min-width: 120px;
-          text-align: center;
-        }
-
-        .progress-ring {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          z-index: -1;
-        }
-
-        .progress-circle {
-          transform: rotate(-90deg);
-        }
-
-        .timer-controls {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 1rem;
-        }
-
-        .control-button {
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          color: white;
-          padding: 0.8rem;
-          border-radius: 12px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s ease;
-          position: relative;
-        }
-
-        .control-button.primary {
-          background: ${isBreak ? 'rgba(34, 197, 94, 0.2)' : 'rgba(59, 130, 246, 0.2)'};
-          border-color: ${isBreak ? 'rgba(34, 197, 94, 0.4)' : 'rgba(59, 130, 246, 0.4)'};
-          padding: 1rem;
-        }
-
-        .control-button.primary:hover {
-          background: ${isBreak ? 'rgba(34, 197, 94, 0.3)' : 'rgba(59, 130, 246, 0.3)'};
-          border-color: ${isBreak ? 'rgba(34, 197, 94, 0.6)' : 'rgba(59, 130, 246, 0.6)'};
-          transform: translateY(-2px);
-        }
-
-        .control-button.secondary:hover {
-          background: rgba(255, 255, 255, 0.2);
-          border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .control-spacer {
-          width: 56px;
-        }
-
-        @media (max-width: 480px) {
-          .timer-container {
-            min-width: 250px;
-            max-width: 280px;
-            padding: 1rem;
-          }
-
-          .time-text {
-            font-size: 2rem;
-          }
-        }
-      `}</style>
     </div>
   )
 }

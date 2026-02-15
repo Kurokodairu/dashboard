@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
 import useAutoRefresh from '../hooks/AutoRefresh.js'
+import './CryptoCard.css'
 
 const CryptoCard = () => {
   const [cryptoData, setCryptoData] = useState([])
@@ -142,90 +143,6 @@ const CryptoCard = () => {
           </div>
         ))}
       </div>
-
-      <style>{`
-        .crypto-list {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-
-        .crypto-item {
-          padding: 0.5rem;
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          transition: all 0.2s ease;
-        }
-
-        .crypto-item:hover {
-          background: rgba(255, 255, 255, 0.08);
-          border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .crypto-info {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .crypto-name {
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
-        }
-
-        .name {
-          font-weight: 600;
-          font-size: 1rem;
-        }
-
-        .symbol {
-          font-size: 0.8rem;
-          opacity: 0.7;
-          text-transform: uppercase;
-        }
-
-        .crypto-price {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-end;
-          gap: 0.25rem;
-        }
-
-        .price {
-          font-weight: 600;
-          font-size: 1.1rem;
-        }
-
-        .change {
-          display: flex;
-          align-items: center;
-          gap: 0.25rem;
-          font-size: 0.9rem;
-          font-weight: 500;
-        }
-
-        .change.positive {
-          color: #4ade80;
-        }
-
-        .change.negative {
-          color: #f87171;
-        }
-
-        @media (max-width: 420px) {
-          .crypto-info {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 0.5rem;
-          }
-          
-          .crypto-price {
-            align-items: flex-start;
-          }
-        }
-      `}</style>
     </div>
   )
 }

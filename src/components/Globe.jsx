@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import createGlobe from 'cobe'
+import './Globe.css'
 
 const Globe = ({onClick}) => {
   const canvasRef = useRef()
@@ -85,22 +86,6 @@ const Globe = ({onClick}) => {
           aspectRatio: '1',
         }}
       />
-      
-      <style>{`
-        .globe-wrapper {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          opacity: 0.8;
-          transition: opacity 0.3s ease;
-        }
-
-        .globe-wrapper:hover {
-          opacity: 1;
-        }
-      `}</style>
     </div>
   )
 }

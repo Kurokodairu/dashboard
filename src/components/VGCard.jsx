@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react'
 import { Newspaper, RefreshCcw } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import useAutoRefresh from '../hooks/AutoRefresh.js'
+import './VGCard.css'
 
 const Motion = motion
 
@@ -90,88 +91,6 @@ const VGCard = () => {
           </p>
         </Motion.div>
       )}
-
-      <style>{`
-        .refresh-button {
-          background: none;
-          border: none;
-          margin-left: auto;
-          cursor: pointer;
-          color: white;
-          opacity: 0.6;
-          transition: opacity 0.2s ease;
-        }
-
-        .refresh-button:hover {
-          opacity: 1;
-        }
-
-        .news-list {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          margin-top: 1rem;
-        }
-
-        .news-item {
-          background: rgba(255, 255, 255, 0.05);
-          padding: 1rem;
-          border-radius: 8px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          text-align: left;
-        }
-
-        .news-link {
-          font-weight: 600;
-          color: white;
-          text-decoration: none;
-          display: block;
-          width: 100%;
-          line-height: 1.4;
-        }
-
-        .news-link:hover {
-          text-decoration: underline;
-        }
-
-        .summary {
-          font-size: 0.9rem;
-          margin-top: 0.5rem;
-          opacity: 0.85;
-          line-height: 1.5;
-          width: 100%;
-          text-align: left;
-        }
-
-        .timestamp {
-          margin-top: 0.5rem;
-          text-align: right;
-          opacity: 0.6;
-        }
-
-        .loading, .error {
-          padding: 1.5rem;
-          text-align: center;
-          opacity: 0.7;
-        }
-
-        .spinner {
-          width: 18px;
-          height: 18px;
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          border-top: 2px solid white;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-          margin: 0 auto 1rem;
-        }
-
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   )
 }

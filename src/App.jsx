@@ -39,31 +39,6 @@ function App() {
     toggleSettings
   } = useSettingsStore()
 
-  const renderColumn = (column) => (
-    <AnimatePresence>
-      {widgetLayout
-        .filter(w => w.column === column && w.visible)
-        .sort((a, b) => a.order - b.order)
-        .map(w => (
-          <Motion.div
-            className="widget"
-            key={w.id}
-            layout
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.9 }}
-            transition={{
-              duration: 0.4,
-              ease: 'easeInOut',
-              layout: { duration: 0.3 }
-            }}
-          >
-            {renderWidgetById(w.id)}
-          </Motion.div>
-        ))}
-    </AnimatePresence>
-  )
-
   const renderWidgetById = (id) => {
     const widgetMap = {
       weather: { component: <WeatherCard cityCoords={cityCoords} />, name: 'Weather' },
@@ -133,6 +108,29 @@ function App() {
     })
   }
 
+  const renderColumn = (columnId) => {
+    return widgetLayout
+      .filter(w => w.visible && w.column === columnId)
+      .sort((a, b) => a.order - b.order)
+      .map(w => (
+        <Motion.div
+          className="widget"
+          key={w.id}
+          layout
+          initial={{ opacity: 0, y: 20, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -20, scale: 0.9 }}
+          transition={{
+            duration: 0.4,
+            ease: 'easeInOut',
+            layout: { duration: 0.3 }
+          }}
+        >
+          {renderWidgetById(w.id)}
+        </Motion.div>
+      ))
+  }
+
   // RETURN RENDER
   return (
     <div className="app">
@@ -175,15 +173,22 @@ function App() {
       </AnimatePresence>
 
       <main className="dashboard-columns">
-        <div className="left-column">
-          {renderColumn('left')}
+        <div className="column-left">
+          <AnimatePresence>
+            {renderColumn(0)}
+          </AnimatePresence>
         </div>
-
-        <div className="right-column">
-          {renderColumn('right')}
+        <div className="column-middle">
+          <AnimatePresence>
+            {renderColumn(1)}
+          </AnimatePresence>
+        </div>
+        <div className="column-right">
+          <AnimatePresence>
+            {renderColumn(2)}
+          </AnimatePresence>
         </div>
       </main>
-
 
       <footer className="footer">
         <p className="footer-text">Dashboard App by <a className="footer-link" href="https://github.com/Kurokodairu" target="_blank" rel="noopener noreferrer">Kurokodairu</a></p>

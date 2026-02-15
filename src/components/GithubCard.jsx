@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Github, Star, GitFork } from 'lucide-react'
+import './GithubCard.css'
 
 const GithubCard = ({ username }) => {
   const [profile, setProfile] = useState(null)
@@ -54,13 +55,6 @@ const GithubCard = ({ username }) => {
           <Github size={48} />
           <p>Set your GitHub username in settings</p>
         </div>
-        <style>{`
-          .no-github {
-            text-align: center;
-            padding: 2rem;
-            opacity: 0.6;
-          }
-        `}</style>
       </div>
     )
   }
@@ -149,139 +143,6 @@ const GithubCard = ({ username }) => {
           )}
         </div>
       )}
-
-      <style>{`
-        .github-content {
-          display: flex;
-          flex-direction: column;
-          gap: 1.5rem;
-        }
-
-        .profile-section {
-          display: flex;
-          gap: 1rem;
-          align-items: flex-start;
-        }
-
-        .avatar {
-          width: 60px;
-          height: 60px;
-          border-radius: 50%;
-          border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .profile-info {
-          flex: 1;
-        }
-
-        .name {
-          font-size: 1.2rem;
-          font-weight: 600;
-          margin: 0 0 0.25rem 0;
-        }
-
-        .username {
-          font-size: 0.9rem;
-          opacity: 0.7;
-          margin: 0 0 0.5rem 0;
-        }
-
-        .bio {
-          font-size: 0.85rem;
-          opacity: 0.8;
-          margin: 0;
-          line-height: 1.4;
-        }
-
-        .heatmap {
-          margin-top: 1rem;
-          max-width: 100%;
-          border-radius: 8px;
-          opacity: 0.85;
-          justify-self: flex;
-        }
-
-        .repos-section h4 {
-          font-size: 1rem;
-          font-weight: 600;
-          margin: 0 0 0.75rem 0;
-        }
-
-        .repo {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
-          padding: 0.75rem;
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 8px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          margin-bottom: 0.5rem;
-        }
-
-        .repo:last-child {
-          margin-bottom: 0;
-        }
-
-        .repo-info {
-          flex: 1;
-        }
-
-        .repo-name {
-          font-size: 0.9rem;
-          font-weight: 600;
-          display: block;
-          margin-bottom: 0.25rem;
-        }
-
-        .repo-desc {
-          font-size: 0.8rem;
-          opacity: 0.7;
-          margin: 0;
-          line-height: 1.3;
-        }
-
-        .repo-stats {
-          display: flex;
-          gap: 0.75rem;
-          align-items: center;
-        }
-
-        .repo-stat {
-          display: flex;
-          align-items: center;
-          gap: 0.25rem;
-          font-size: 0.8rem;
-          opacity: 0.7;
-        }
-
-        .loading, .error {
-          text-align: center;
-          padding: 2rem;
-          opacity: 0.6;
-        }
-
-        .spinner {
-          width: 24px;
-          height: 24px;
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          border-top: 2px solid white;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-          margin: 0 auto 1rem;
-        }
-
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 480px) {
-          .profile-section {
-            flex-direction: column;
-            text-align: center;
-          }
-        }
-      `}</style>
     </div>
   )
 }
